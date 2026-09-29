@@ -1,0 +1,46 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<%- include('../partials/account-nav') %>
+<div class="container account-body">
+  <% if (counts.counters) { %>
+    <div class="notice notice-accent"><svg class="ic"><use href="#i-tag"/></svg> You have <strong><%= counts.counters %></strong> counter-offer<%= counts.counters === 1 ? '' : 's' %> waiting for your response. <a href="/account/offers?status=counter_offer">Review now</a></div>
+  <% } %>
+  <div class="stat-grid">
+    <a class="stat" href="/account/offers"><span class="stat-value"><%= counts.offers %></span><span class="stat-label">Offers submitted</span></a>
+    <a class="stat" href="/account/offers?status=reviewing"><span class="stat-value"><%= counts.open_offers %></span><span class="stat-label">Open offers</span></a>
+    <a class="stat" href="/account/offers?status=accepted"><span class="stat-value"><%= counts.accepted %></span><span class="stat-label">Accepted</span></a>
+    <a class="stat" href="/account/saved"><span class="stat-value"><%= counts.saved %></span><span class="stat-label">Saved products</span></a>
+  </div>
+
+  <div class="two-col">
+    <section class="card">
+      <div class="card-head"><h2>Recent offers</h2><a class="link-more" href="/account/offers">All offers <svg class="ic"><use href="#i-chevron"/></svg></a></div>
+      <% if (offers.length) { %>
+        <div class="list"><% offers.forEach(function (o) { %><%- include('../partials/offer-row', { o }) %><% }) %></div>
+      <% } else { %>
+        <div class="empty empty-sm"><p>You haven't made any offers yet.</p><a class="btn btn-accent" href="/products">Browse products</a></div>
+      <% } %>
+    </section>
+    <section class="card">
+      <div class="card-head"><h2>Business details</h2><a class="link-more" href="/account/profile">Edit <svg class="ic"><use href="#i-chevron"/></svg></a></div>
+      <dl class="spec-list">
+        <div><dt>Name</dt><dd><%= user.name %></dd></div>
+        <div><dt>Business</dt><dd><%= user.business_name || '—' %></dd></div>
+        <div><dt>Email</dt><dd><%= user.email %></dd></div>
+        <div><dt>Phone</dt><dd><%= user.phone || '—' %></dd></div>
+        <div><dt>Enquiries</dt><dd><a href="/account/enquiries"><%= counts.enquiries %> sent</a></dd></div>
+      </dl>
+      <form action="/logout" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ghost btn-sm" type="submit">Log out</button></form>
+    </section>
+  </div>
+
+  <section class="section-tight">
+    <div class="section-head"><h2>Saved products</h2><a class="link-more" href="/account/saved">View all <svg class="ic"><use href="#i-chevron"/></svg></a></div>
+    <% if (saved.length) { %>
+      <div class="product-grid"><% saved.forEach(function (p) { %><%- include('../partials/product-card', { p }) %><% }) %></div>
+    <% } else { %>
+      <p class="muted">Tap the heart on any product to save it here for quick re-ordering.</p>
+    <% } %>
+  </section>
+</div>
+<%- include('../partials/footer') %>

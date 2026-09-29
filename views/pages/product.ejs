@@ -1,0 +1,115 @@
+<%
+  const p = product;
+  const jsonLd = {
+    '@context': 'https://schema.org', '@type': 'Product', name: p.name, sku: p.sku,
+    brand: p.brand ? { '@type': 'Brand', name: p.brand } : undefined,
+    category: p.category_name, description: p.description,
+    image: p.image ? siteUrl + p.image : undefined, url: siteUrl + '/products/' + p.slug,
+  };
+%>
+<%- include('../partials/head', { jsonLd }) %>
+<%- include('../partials/header') %>
+
+<div class="container">
+  <nav class="breadcrumbs breadcrumbs-product" aria-label="Breadcrumb">
+    <a href="/">Home</a><svg class="ic"><use href="#i-chevron"/></svg>
+    <% if (p.category_slug) { %><a href="/category/<%= p.category_slug %>"><%= p.category_name %></a><svg class="ic"><use href="#i-chevron"/></svg><% } %>
+    <span><%= p.name %></span>
+  </nav>
+
+  <div class="product-layout">
+    <div class="product-gallery">
+      <div class="product-image">
+        <% if (p.image) { %><img src="<%= p.image %>" alt="<%= p.brand %> <%= p.name %>" width="600" height="600"><% } else { %><span class="no-image"><svg class="ic"><use href="#i-box"/></svg></span><% } %>
+        <span class="card-badges">
+          <% if (p.new_product) { %><span class="badge badge-new">New</span><% } %>
+          <% if (p.featured) { %><span class="badge badge-featured">Featured</span><% } %>
+        </span>
+      </div>
+    </div>
+
+    <div class="product-info">
+      <p class="product-brand"><%= p.brand %></p>
+      <h1 class="product-title"><%= p.name %></h1>
+      <p class="product-sku">SKU <strong><%= p.sku %></strong><% if (p.category_name) { %> · <a href="/category/<%= p.category_slug %>"><%= p.category_name %></a><% } %></p>
+
+      <div class="price-box">
+        <% if (p.wholesale_price) { %>
+          <div><span class="price-label">Guide trade price</span><span class="price-big"><%= money(p.wholesale_price) %></span><span class="price-unit">per pack · ex VAT</span></div>
+        <% } else if (!user) { %>
+          <div><span class="price-label">Trade price</span><a class="price-login" href="/login"><svg class="ic"><use href="#i-lock"/></svg> Log in or register to see trade prices</a></div>
+        <% } else { %>
+          <div><span class="price-label">Trade price</span><span class="price-big muted">On request</span></div>
+        <% } %>
+        <% if (p.suggested_price) { %><div class="rrp"><span class="price-label">RRP</span><strong><%= money(p.suggested_price) %></strong></div><% } %>
+      </div>
+
+      <dl class="spec-list">
+        <div><dt>Pack / carton</dt><dd><%= p.pack_size || 'Single unit' %></dd></div>
+        <div><dt>Minimum order</dt><dd><%= p.minimum_order %> pack<%= p.minimum_order === 1 ? '' : 's' %></dd></div>
+        <div><dt>Available</dt><dd><span class="stock stock-<%= p.availability.key %>"><%= p.availability.label %></span><% if (p.stock_quantity > 0) { %> · <%= p.stock_quantity.toLocaleString('en-GB') %> packs<% } %></dd></div>
+        <div><dt>Brand</dt><dd><%= p.brand || '—' %></dd></div>
+        <div><dt>Category</dt><dd><%= p.category_name || '—' %></dd></div>
+      </dl>
+
+      <% if (p.age_restricted) { %><p class="notice notice-warn"><svg class="ic"><use href="#i-shield"/></svg> Age-restricted product. Supplied to registered trade customers only; retailers must follow Challenge 25.</p><% } %>
+
+      <div class="product-cta">
+        <a class="btn btn-accent btn-lg btn-block" href="/offer?product=<%= p.slug %>"><svg class="ic"><use href="#i-tag"/></svg> Make an Offer</a>
+        <a class="btn btn-outline btn-lg btn-block" href="#enquiry"><svg class="ic"><use href="#i-chat"/></svg> Send Enquiry</a>
+        <% if (isBuyer) { %>
+        <form action="/account/saved/<%= p.id %>" method="post" data-save class="save-inline">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="back" value="<%= path %>">
+          <button type="submit" class="btn btn-ghost btn-block save-btn-inline<%= savedIds.has(p.id) ? ' is-saved' : '' %>" aria-pressed="<%= savedIds.has(p.id) %>">
+            <svg class="ic ic-off"><use href="#i-heart"/></svg><svg class="ic ic-on"><use href="#i-heart-fill"/></svg> <span data-save-label><%= savedIds.has(p.id) ? 'Saved' : 'Save product' %></span>
+          </button>
+        </form>
+        <% } %>
+      </div>
+      <ul class="assurance">
+        <li><svg class="ic"><use href="#i-check"/></svg> No online payment — agree the deal first</li>
+        <li><svg class="ic"><use href="#i-check"/></svg> Replies usually within 2 working hours</li>
+        <li><svg class="ic"><use href="#i-check"/></svg> Delivery or depot collection available</li>
+      </ul>
+    </div>
+  </div>
+
+  <section class="product-desc">
+    <h2>Product description</h2>
+    <p><%= p.description || 'Contact us for full product details.' %></p>
+  </section>
+
+  <section class="enquiry-box" id="enquiry">
+    <div class="enquiry-intro">
+      <h2>Send an enquiry</h2>
+      <p>Questions about lead times, pallet quantities or price-marked stock? Ask us about <strong><%= p.name %></strong>.</p>
+    </div>
+    <form action="/enquiry" method="post" class="form-grid">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="product_id" value="<%= p.id %>">
+      <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <div class="field"><label for="e-name">Your name *</label><input id="e-name" name="name" required autocomplete="name" value="<%= enquiry.name %>"></div>
+      <div class="field"><label for="e-biz">Business name</label><input id="e-biz" name="business_name" autocomplete="organization" value="<%= enquiry.business_name %>"></div>
+      <div class="field"><label for="e-email">Email *</label><input id="e-email" type="email" name="email" required autocomplete="email" inputmode="email" value="<%= enquiry.email %>"></div>
+      <div class="field"><label for="e-phone">Phone</label><input id="e-phone" type="tel" name="phone" autocomplete="tel" inputmode="tel" value="<%= enquiry.phone %>"></div>
+      <div class="field field-full"><label for="e-msg">Message *</label><textarea id="e-msg" name="message" rows="4" required placeholder="e.g. What's the lead time on 20 cases?"><%= enquiry.message %></textarea></div>
+      <div class="field-full"><button class="btn btn-primary btn-lg" type="submit">Send Enquiry</button></div>
+    </form>
+  </section>
+
+  <% if (related.length) { %>
+  <section class="section section-tight">
+    <div class="section-head"><h2>Related products</h2><% if (p.category_slug) { %><a class="link-more" href="/category/<%= p.category_slug %>">More <%= p.category_name %> <svg class="ic"><use href="#i-chevron"/></svg></a><% } %></div>
+    <div class="product-grid">
+      <% related.forEach(function (rp) { %><%- include('../partials/product-card', { p: rp }) %><% }) %>
+    </div>
+  </section>
+  <% } %>
+</div>
+
+<div class="sticky-cta" aria-label="Quick actions">
+  <a class="btn btn-outline" href="#enquiry">Enquire</a>
+  <a class="btn btn-accent" href="/offer?product=<%= p.slug %>">Make an Offer</a>
+</div>
+
+<%- include('../partials/footer') %>

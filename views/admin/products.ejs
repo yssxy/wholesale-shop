@@ -1,0 +1,48 @@
+<%- include('../partials/admin-top') %>
+<div class="admin-head">
+  <div><h1>Products</h1><p class="muted"><%= products.length %> product<%= products.length === 1 ? '' : 's' %></p></div>
+  <a class="btn btn-accent" href="/admin/products/new"><svg class="ic"><use href="#i-plus"/></svg> Add Product</a>
+</div>
+<form class="toolbar" method="get" action="/admin/products">
+  <input type="search" name="q" value="<%= q %>" placeholder="Search name, brand or SKU" aria-label="Search products">
+  <select name="category" aria-label="Category" data-autosubmit-select>
+    <option value="">All categories</option>
+    <% categories.forEach(function (c) { %><option value="<%= c.id %>" <%= cat === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %>
+  </select>
+  <select name="status" aria-label="Status" data-autosubmit-select>
+    <% [['', 'Any status'], ['active', 'Active'], ['inactive', 'Inactive'], ['featured', 'Featured'], ['new', 'New'], ['out', 'Out of stock']].forEach(function ([k, l]) { %><option value="<%= k %>" <%= status === k ? 'selected' : '' %>><%= l %></option><% }) %>
+  </select>
+  <button class="btn btn-primary btn-sm" type="submit">Filter</button>
+</form>
+<div class="card table-card">
+  <table class="table table-responsive">
+    <thead><tr><th>Product</th><th>Category</th><th class="num">Stock</th><th class="num">Wholesale</th><th class="num">Cost</th><th class="num">Margin</th><th>Flags</th><th class="num">Views</th><th class="num">Offers</th><th></th></tr></thead>
+    <tbody>
+    <% products.forEach(function (p) { const margin = p.wholesale_price && p.cost_price ? ((p.wholesale_price - p.cost_price) / p.wholesale_price * 100) : null; %>
+      <tr class="<%= p.active ? '' : 'is-inactive' %>">
+        <td data-label="Product"><div class="cell-product"><% if (p.image) { %><img src="<%= p.image %>" alt="" width="44" height="44" loading="lazy"><% } else { %><span class="thumb-empty"></span><% } %><div><a href="/admin/products/<%= p.id %>/edit"><strong><%= p.name %></strong></a><span class="muted small"><%= p.brand %> · <%= p.sku %> · <%= p.pack_size %></span></div></div></td>
+        <td data-label="Category"><%= p.category_name || '—' %></td>
+        <td data-label="Stock" class="num"><span class="<%= p.stock_quantity <= 0 ? 'text-bad' : '' %>"><%= p.stock_quantity %></span></td>
+        <td data-label="Wholesale" class="num"><%= money(p.wholesale_price) %></td>
+        <td data-label="Cost" class="num"><%= money(p.cost_price) %></td>
+        <td data-label="Margin" class="num"><%= margin === null ? '—' : margin.toFixed(0) + '%' %></td>
+        <td data-label="Flags">
+          <div class="flag-toggles">
+            <% [['active', 'Active'], ['featured', 'Featured'], ['new_product', 'New']].forEach(function ([f, l]) { %>
+              <form action="/admin/products/<%= p.id %>/toggle" method="post" data-toggle>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="field" value="<%= f %>">
+                <button type="submit" class="flag <%= p[f] ? 'flag-on' : '' %>" aria-pressed="<%= !!p[f] %>"><%= l %></button>
+              </form>
+            <% }) %>
+          </div>
+        </td>
+        <td data-label="Views" class="num"><%= p.views %></td>
+        <td data-label="Offers" class="num"><%= p.offer_count %></td>
+        <td class="row-actions"><a class="btn btn-outline btn-xs" href="/admin/products/<%= p.id %>/edit">Edit</a><% if (p.active) { %><a class="btn btn-ghost btn-xs" href="/products/<%= p.slug %>" target="_blank" rel="noopener">View</a><% } %></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% if (!products.length) { %><div class="empty empty-sm"><p>No products match.</p></div><% } %>
+</div>
+<%- include('../partials/admin-bottom') %>

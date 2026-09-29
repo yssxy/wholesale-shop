@@ -1,0 +1,33 @@
+<%- include('../partials/admin-top') %>
+<div class="admin-head"><div><h1>Offers</h1><p class="muted"><%= offers.length %> shown</p></div></div>
+<div class="chips chips-scroll">
+  <a class="chip <%= !status ? 'chip-active' : '' %>" href="/admin/offers">All</a>
+  <% OFFER_STATUSES.forEach(function ([k, l]) { %><a class="chip <%= status === k ? 'chip-active' : '' %>" href="/admin/offers?status=<%= k %>"><%= l %> <span class="chip-count"><%= counts[k] || 0 %></span></a><% }) %>
+</div>
+<form class="toolbar" method="get" action="/admin/offers">
+  <% if (status) { %><input type="hidden" name="status" value="<%= status %>"><% } %>
+  <input type="search" name="q" value="<%= q %>" placeholder="Search reference, buyer, business, product" aria-label="Search offers">
+  <button class="btn btn-primary btn-sm" type="submit">Search</button>
+</form>
+<div class="card table-card">
+  <table class="table table-responsive">
+    <thead><tr><th>Date</th><th>Buyer</th><th>Product</th><th class="num">Qty</th><th class="num">Offer</th><th class="num">vs list</th><th class="num">Value</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    <% offers.forEach(function (o) { const diff = o.wholesale_price ? ((o.offer_price - o.wholesale_price) / o.wholesale_price * 100) : null; %>
+      <tr class="<%= o.status === 'new' ? 'is-new' : '' %>">
+        <td data-label="Date"><%= formatDate(o.created_at) %><span class="muted small block"><%= o.reference %></span></td>
+        <td data-label="Buyer"><strong><%= o.buyer_name %></strong><span class="muted small block"><%= o.business_name || (o.buyer_id ? '' : 'Guest') %></span></td>
+        <td data-label="Product"><%= o.product_name %></td>
+        <td data-label="Qty" class="num"><%= o.quantity.toLocaleString('en-GB') %></td>
+        <td data-label="Offer" class="num"><strong><%= money(o.offer_price) %></strong><% if (o.counter_price) { %><span class="small block accent">Counter <%= money(o.counter_price) %></span><% } %></td>
+        <td data-label="vs list" class="num"><% if (diff !== null) { %><span class="<%= diff < -10 ? 'text-bad' : (diff >= 0 ? 'text-ok' : '') %>"><%= diff > 0 ? '+' : '' %><%= diff.toFixed(0) %>%</span><% } else { %>—<% } %></td>
+        <td data-label="Value" class="num"><%= money(o.quantity * (o.agreed_price || o.counter_price || o.offer_price)) %></td>
+        <td data-label="Status"><span class="status status-<%= o.status %>"><%= statusLabel(OFFER_STATUSES, o.status) %></span></td>
+        <td class="row-actions"><a class="btn btn-outline btn-xs" href="/admin/offers/<%= o.id %>">Open</a></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% if (!offers.length) { %><div class="empty empty-sm"><p>No offers found.</p></div><% } %>
+</div>
+<%- include('../partials/admin-bottom') %>

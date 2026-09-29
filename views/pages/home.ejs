@@ -1,0 +1,106 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <p class="eyebrow">UK trade wholesale catalogue</p>
+      <h1>Wholesale stock for UK retailers. <span>Name your price.</span></h1>
+      <p class="lead">Browse <%= navCategories.reduce((a, c) => a + c.product_count, 0) %>+ trade lines across <%= navCategories.length %> categories — from carrier bags and batteries to drinks and catering disposables. No checkout, no fuss: just make an offer.</p>
+      <form class="hero-search" action="/products" method="get" role="search">
+        <label class="sr-only" for="hero-q">Search products</label>
+        <svg class="ic"><use href="#i-search"/></svg>
+        <input id="hero-q" type="search" name="q" placeholder="Search by product, brand or SKU" autocomplete="off">
+        <button class="btn btn-accent" type="submit">Search</button>
+      </form>
+      <div class="hero-actions">
+        <a class="btn btn-light" href="/products">Browse Products</a>
+        <a class="btn btn-outline-light" href="/offer">Make an Offer</a>
+      </div>
+    </div>
+    <ul class="hero-points">
+      <li><svg class="ic"><use href="#i-tag"/></svg><div><strong>Make an offer</strong><span>on any product, any quantity</span></div></li>
+      <li><svg class="ic"><use href="#i-truck"/></svg><div><strong>UK delivery</strong><span>or collect from our depot</span></div></li>
+      <li><svg class="ic"><use href="#i-shield"/></svg><div><strong>Trade only</strong><span>for registered businesses</span></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2>Browse Our Products</h2>
+      <a class="link-more" href="/categories">All categories <svg class="ic"><use href="#i-chevron"/></svg></a>
+    </div>
+    <div class="category-grid">
+      <% navCategories.forEach(function (c) { %>
+      <a class="category-tile" href="/category/<%= c.slug %>">
+        <span class="category-img"><% if (c.image) { %><img src="<%= c.image %>" alt="" loading="lazy" width="120" height="120"><% } %></span>
+        <span class="category-name"><%= c.name %></span>
+        <span class="category-count"><%= c.product_count %> products</span>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<% if (featured.length) { %>
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <h2>Featured Products</h2>
+      <a class="link-more" href="/products?featured=1">View all <svg class="ic"><use href="#i-chevron"/></svg></a>
+    </div>
+    <div class="product-grid">
+      <% featured.forEach(function (p) { %><%- include('../partials/product-card', { p }) %><% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<section class="section">
+  <div class="container">
+    <div class="offer-banner">
+      <div class="offer-banner-copy">
+        <p class="eyebrow">How it works</p>
+        <h2>Make an offer in under a minute</h2>
+        <ol class="steps">
+          <li><span>1</span> Find the product you need</li>
+          <li><span>2</span> Tell us the quantity and your price</li>
+          <li><span>3</span> We accept, or send a counter-offer</li>
+          <li><span>4</span> Agree the deal and arrange delivery</li>
+        </ol>
+      </div>
+      <a class="btn btn-accent btn-lg" href="/offer">Make an Offer</a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <h2>Recently Added</h2>
+      <a class="link-more" href="/new-products">New products <svg class="ic"><use href="#i-chevron"/></svg></a>
+    </div>
+    <div class="product-grid">
+      <% recent.forEach(function (p) { %><%- include('../partials/product-card', { p }) %><% }) %>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container contact-strip">
+    <div>
+      <h2>Talk to our trade team</h2>
+      <p>Pallet deals, regular orders or a product you can't find? Get in touch — we're open 7 days.</p>
+    </div>
+    <div class="contact-strip-actions">
+      <a class="contact-chip" href="tel:<%= site.phoneHref %>"><svg class="ic"><use href="#i-phone"/></svg><span><small>Call</small><%= site.phone %></span></a>
+      <a class="contact-chip" href="https://wa.me/<%= site.whatsappHref %>" rel="noopener"><svg class="ic"><use href="#i-whatsapp"/></svg><span><small>WhatsApp</small><%= site.whatsapp %></span></a>
+      <a class="contact-chip" href="mailto:<%= site.email %>"><svg class="ic"><use href="#i-mail"/></svg><span><small>Email</small><%= site.email %></span></a>
+      <a class="btn btn-primary" href="/contact">Send an Enquiry</a>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

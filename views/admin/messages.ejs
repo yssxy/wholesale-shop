@@ -1,0 +1,21 @@
+<%- include('../partials/admin-top') %>
+<div class="admin-head"><div><h1>Contact Messages</h1><p class="muted">Submissions from the contact form.</p></div></div>
+<div class="stack">
+<% messages.forEach(function (m) { %>
+  <article class="card message-card <%= m.is_read ? '' : 'is-unread' %>" id="m<%= m.id %>">
+    <header class="message-head">
+      <div><strong><%= m.name %></strong><%= m.business_name ? ' · ' + m.business_name : '' %><span class="muted small block"><%= formatDate(m.created_at, true) %></span></div>
+      <% if (!m.is_read) { %><span class="badge badge-new">New</span><% } %>
+    </header>
+    <p class="message-body"><%= m.message %></p>
+    <div class="message-actions">
+      <a class="btn btn-outline btn-xs" href="mailto:<%= m.email %>?subject=<%= encodeURIComponent('Re: your message to WholesaleHub') %>"><svg class="ic"><use href="#i-mail"/></svg> <%= m.email %></a>
+      <% if (m.phone) { %><a class="btn btn-outline btn-xs" href="tel:<%= m.phone.replace(/\s/g, '') %>"><svg class="ic"><use href="#i-phone"/></svg> <%= m.phone %></a><% } %>
+      <form action="/admin/messages/<%= m.id %>/read" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ghost btn-xs" type="submit"><%= m.is_read ? 'Mark unread' : 'Mark read' %></button></form>
+      <form action="/admin/messages/<%= m.id %>/delete" method="post" data-confirm="Delete this message?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-ghost btn-xs text-bad" type="submit">Delete</button></form>
+    </div>
+  </article>
+<% }) %>
+<% if (!messages.length) { %><div class="card"><p class="muted">No messages yet.</p></div><% } %>
+</div>
+<%- include('../partials/admin-bottom') %>

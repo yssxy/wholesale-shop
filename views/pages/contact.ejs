@@ -1,0 +1,44 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-head page-head-compact">
+  <div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><svg class="ic"><use href="#i-chevron"/></svg><span>Contact</span></nav>
+    <h1>Contact Us</h1>
+    <p class="page-intro">Speak to our trade team about pricing, pallet deals, delivery or opening an account.</p>
+  </div>
+</div>
+<div class="container contact-layout">
+  <div class="contact-cards">
+    <div class="card contact-card">
+      <h2><%= site.name %></h2>
+      <ul class="contact-list">
+        <li><svg class="ic"><use href="#i-phone"/></svg><div><small>Phone</small><a href="tel:<%= site.phoneHref %>"><%= site.phone %></a></div></li>
+        <li><svg class="ic"><use href="#i-whatsapp"/></svg><div><small>WhatsApp</small><a href="https://wa.me/<%= site.whatsappHref %>" rel="noopener"><%= site.whatsapp %></a></div></li>
+        <li><svg class="ic"><use href="#i-mail"/></svg><div><small>Email</small><a href="mailto:<%= site.email %>"><%= site.email %></a></div></li>
+        <li><svg class="ic"><use href="#i-pin"/></svg><div><small>Trade counter &amp; depot</small><address><%- site.address.map(l => l.replace(/[&<>]/g, '')).join('<br>') %></address></div></li>
+      </ul>
+    </div>
+    <div class="card contact-card">
+      <h2><svg class="ic"><use href="#i-clock"/></svg> Opening hours</h2>
+      <table class="hours">
+        <% site.hours.forEach(function ([d, h]) { %><tr><th scope="row"><%= d %></th><td><%= h %></td></tr><% }) %>
+      </table>
+      <p class="muted small">Closed on bank holidays. Orders placed by 2pm are usually dispatched next working day.</p>
+    </div>
+  </div>
+
+  <form action="/contact" method="post" class="card form-card" novalidate>
+    <h2>Send us a message</h2>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="form-grid">
+      <div class="field <%= errors.name ? 'has-error' : '' %>"><label for="c-name">Name *</label><input id="c-name" name="name" required autocomplete="name" value="<%= form.name %>"><% if (errors.name) { %><p class="field-error"><%= errors.name %></p><% } %></div>
+      <div class="field"><label for="c-biz">Business</label><input id="c-biz" name="business_name" autocomplete="organization" value="<%= form.business_name %>"></div>
+      <div class="field <%= errors.email ? 'has-error' : '' %>"><label for="c-email">Email *</label><input id="c-email" type="email" name="email" required autocomplete="email" inputmode="email" value="<%= form.email %>"><% if (errors.email) { %><p class="field-error"><%= errors.email %></p><% } %></div>
+      <div class="field"><label for="c-phone">Phone</label><input id="c-phone" type="tel" name="phone" autocomplete="tel" inputmode="tel" value="<%= form.phone %>"></div>
+      <div class="field field-full <%= errors.message ? 'has-error' : '' %>"><label for="c-msg">Message *</label><textarea id="c-msg" name="message" rows="6" required><%= form.message %></textarea><% if (errors.message) { %><p class="field-error"><%= errors.message %></p><% } %></div>
+    </div>
+    <button class="btn btn-primary btn-lg btn-block" type="submit">Send Message</button>
+  </form>
+</div>
+<%- include('../partials/footer') %>

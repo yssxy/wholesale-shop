@@ -1,0 +1,109 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-head page-head-compact">
+  <div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><svg class="ic"><use href="#i-chevron"/></svg><span>Make an Offer</span></nav>
+    <h1>Make an Offer</h1>
+    <p class="page-intro">Tell us the quantity and the price you'd like to pay. No payment is taken — our trade team will accept, or come back with a counter-offer.</p>
+  </div>
+</div>
+
+<div class="container offer-layout">
+  <form action="/offer" method="post" class="card form-card" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+    <% if (Object.keys(errors).length) { %><div class="form-error-summary" role="alert">Please check the highlighted fields below.</div><% } %>
+
+    <h2 class="form-section">Product</h2>
+    <div class="form-grid">
+      <div class="field field-full <%= errors.product_id ? 'has-error' : '' %>">
+        <label for="o-product">Product *</label>
+        <select id="o-product" name="product_id" required data-offer-product>
+          <option value="">Choose a product…</option>
+          <% products.forEach(function (op) { %>
+            <option value="<%= op.id %>" data-moq="<%= op.minimum_order %>" <%= String(form.product_id) === String(op.id) ? 'selected' : '' %>><%= op.name %><%= op.brand ? ' – ' + op.brand : '' %><%= op.pack_size ? ' (' + op.pack_size + ')' : '' %></option>
+          <% }) %>
+        </select>
+        <% if (errors.product_id) { %><p class="field-error"><%= errors.product_id %></p><% } %>
+      </div>
+      <div class="field <%= errors.quantity ? 'has-error' : '' %>">
+        <label for="o-qty">Quantity required (packs) *</label>
+        <div class="qty">
+          <button type="button" class="qty-btn" data-qty="-1" aria-label="Decrease quantity">−</button>
+          <input id="o-qty" type="number" name="quantity" min="1" step="1" inputmode="numeric" required value="<%= form.quantity %>" data-qty-input>
+          <button type="button" class="qty-btn" data-qty="1" aria-label="Increase quantity">+</button>
+        </div>
+        <p class="field-hint" data-moq-hint><% if (product) { %>Minimum order: <%= product.minimum_order %> packs<% } %></p>
+        <% if (errors.quantity) { %><p class="field-error"><%= errors.quantity %></p><% } %>
+      </div>
+      <div class="field <%= errors.offer_price ? 'has-error' : '' %>">
+        <label for="o-price">Your offer price per pack (£, ex VAT) *</label>
+        <div class="input-prefix"><span>£</span><input id="o-price" type="text" name="offer_price" inputmode="decimal" placeholder="0.00" required value="<%= form.offer_price %>" data-offer-price></div>
+        <p class="field-hint" data-offer-total></p>
+        <% if (errors.offer_price) { %><p class="field-error"><%= errors.offer_price %></p><% } %>
+      </div>
+    </div>
+
+    <h2 class="form-section">Your details</h2>
+    <div class="form-grid">
+      <div class="field <%= errors.buyer_name ? 'has-error' : '' %>">
+        <label for="o-name">Buyer name *</label>
+        <input id="o-name" name="buyer_name" required autocomplete="name" value="<%= form.buyer_name %>">
+        <% if (errors.buyer_name) { %><p class="field-error"><%= errors.buyer_name %></p><% } %>
+      </div>
+      <div class="field">
+        <label for="o-biz">Business name</label>
+        <input id="o-biz" name="business_name" autocomplete="organization" value="<%= form.business_name %>">
+      </div>
+      <div class="field <%= errors.email ? 'has-error' : '' %>">
+        <label for="o-email">Email *</label>
+        <input id="o-email" type="email" name="email" required autocomplete="email" inputmode="email" value="<%= form.email %>">
+        <% if (errors.email) { %><p class="field-error"><%= errors.email %></p><% } %>
+      </div>
+      <div class="field <%= errors.phone ? 'has-error' : '' %>">
+        <label for="o-phone">Phone</label>
+        <input id="o-phone" type="tel" name="phone" autocomplete="tel" inputmode="tel" value="<%= form.phone %>">
+        <% if (errors.phone) { %><p class="field-error"><%= errors.phone %></p><% } %>
+      </div>
+      <fieldset class="field field-full">
+        <legend>Preferred contact method</legend>
+        <div class="segmented">
+          <% CONTACT_METHODS.forEach(function ([k, label]) { %>
+            <label><input type="radio" name="contact_method" value="<%= k %>" <%= form.contact_method === k ? 'checked' : '' %>><span><%= label %></span></label>
+          <% }) %>
+        </div>
+      </fieldset>
+      <div class="field field-full">
+        <label for="o-msg">Message</label>
+        <textarea id="o-msg" name="message" rows="4" placeholder="Delivery postcode, timescales, regular order…"><%= form.message %></textarea>
+      </div>
+    </div>
+    <button class="btn btn-accent btn-lg btn-block" type="submit">Submit Offer</button>
+    <p class="form-note">By submitting you confirm you are buying for a business. We'll only use your details to respond to this offer.</p>
+  </form>
+
+  <aside class="offer-aside">
+    <% if (product) { %>
+    <div class="card offer-product">
+      <% if (product.image) { %><img src="<%= product.image %>" alt="" width="120" height="120"><% } %>
+      <div>
+        <p class="card-meta"><%= product.brand %></p>
+        <h2><a href="/products/<%= product.slug %>"><%= product.name %></a></h2>
+        <p class="muted"><%= product.pack_size %> · MOQ <%= product.minimum_order %></p>
+        <% if (product.wholesale_price) { %><p>Guide price <strong><%= money(product.wholesale_price) %></strong></p><% } %>
+      </div>
+    </div>
+    <% } %>
+    <div class="card how-card">
+      <h2>What happens next?</h2>
+      <ol class="steps steps-dark">
+        <li><span>1</span> We review your offer</li>
+        <li><span>2</span> We accept, or send a counter-offer</li>
+        <li><span>3</span> You track the status online</li>
+        <li><span>4</span> We arrange delivery or collection</li>
+      </ol>
+      <% if (!user) { %><p class="muted small"><a href="/register">Open a free trade account</a> to see trade prices and track all your offers in one place.</p><% } %>
+    </div>
+  </aside>
+</div>
+<%- include('../partials/footer') %>

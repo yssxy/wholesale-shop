@@ -1,0 +1,58 @@
+</main>
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-cta">
+      <div>
+        <h2>Seen a price you'd like to beat?</h2>
+        <p>Tell us what you want to pay. Our trade team replies to most offers the same working day.</p>
+      </div>
+      <a href="/offer" class="btn btn-accent btn-lg">Make an Offer</a>
+    </div>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="/"><%- include('logo') %></a>
+        <p><%= site.tagline %>. Trusted by convenience stores, newsagents, off-licences and caterers across the UK.</p>
+      </div>
+      <div>
+        <h3>Shop</h3>
+        <ul>
+          <li><a href="/products">All Products</a></li>
+          <li><a href="/new-products">New Products</a></li>
+          <li><a href="/categories">Categories</a></li>
+          <li><a href="/offer">Make an Offer</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Popular</h3>
+        <ul>
+          <% navCategories.slice(0, 5).forEach(function (c) { %><li><a href="/category/<%= c.slug %>"><%= c.name %></a></li><% }) %>
+        </ul>
+      </div>
+      <div>
+        <h3>Trade Account</h3>
+        <ul>
+          <li><a href="/register">Open an Account</a></li>
+          <li><a href="/login">Buyer Login</a></li>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <ul class="footer-contact">
+          <li><a href="tel:<%= site.phoneHref %>"><svg class="ic"><use href="#i-phone"/></svg> <%= site.phone %></a></li>
+          <li><a href="mailto:<%= site.email %>"><svg class="ic"><use href="#i-mail"/></svg> <%= site.email %></a></li>
+          <li><a href="https://wa.me/<%= site.whatsappHref %>" rel="noopener"><svg class="ic"><use href="#i-whatsapp"/></svg> <%= site.whatsapp %></a></li>
+          <li><svg class="ic"><use href="#i-pin"/></svg> <%= site.address.join(', ') %></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <%= new Date().getFullYear() %> <%= site.name %>. Trade customers only. Prices exclude VAT.</span>
+      <span>Age-restricted products are sold to registered businesses only.</span>
+    </div>
+  </div>
+</footer>
+<script src="/static/js/app.js" defer></script>
+</body>
+</html>

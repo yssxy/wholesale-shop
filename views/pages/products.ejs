@@ -1,0 +1,115 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<%
+  const activeFilters = [];
+  if (!fixed.category && opts.category) { const c = navCategories.find(x => x.slug === opts.category); if (c) activeFilters.push(['category', c.name]); }
+  if (opts.brand) activeFilters.push(['brand', opts.brand]);
+  if (opts.pack) activeFilters.push(['pack', opts.pack]);
+  if (opts.availability === 'in') activeFilters.push(['availability', 'In stock']);
+  if (opts.availability === 'out') activeFilters.push(['availability', 'Out of stock']);
+  if (!fixed.isNew && opts.isNew) activeFilters.push(['new', 'New products']);
+  if (opts.featured) activeFilters.push(['featured', 'Featured']);
+  const without = (key) => { const u = new URLSearchParams(); Object.entries(query).forEach(([k, v]) => { if (k !== key && k !== 'page' && v) u.set(k, v); }); const s = u.toString(); return path + (s ? '?' + s : ''); };
+%>
+<div class="page-head">
+  <div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><svg class="ic"><use href="#i-chevron"/></svg><% if (category) { %><a href="/categories">Categories</a><svg class="ic"><use href="#i-chevron"/></svg><span><%= category.name %></span><% } else { %><span><%= heading %></span><% } %></nav>
+    <h1 class="<%= category ? 'upper' : '' %>"><%= heading %></h1>
+    <% if (intro) { %><p class="page-intro"><%= intro %></p><% } %>
+  </div>
+</div>
+
+<div class="container listing">
+  <aside class="filters" id="filters" aria-label="Filters">
+    <form action="<%= path %>" method="get" class="filter-form" data-autosubmit>
+      <div class="filters-head">
+        <h2>Filter</h2>
+        <button type="button" class="icon-btn filters-close" aria-label="Close filters" data-filters-close><svg class="ic ic-lg"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="field">
+        <label for="f-q">Search</label>
+        <input id="f-q" type="search" name="q" value="<%= opts.q || '' %>" placeholder="Name, brand or SKU">
+      </div>
+      <% if (!fixed.category) { %>
+      <div class="field">
+        <label for="f-cat">Category</label>
+        <select id="f-cat" name="category">
+          <option value="">All categories</option>
+          <% navCategories.forEach(function (c) { %><option value="<%= c.slug %>" <%= opts.category === c.slug ? 'selected' : '' %>><%= c.name %></option><% }) %>
+        </select>
+      </div>
+      <% } %>
+      <div class="field">
+        <label for="f-brand">Brand</label>
+        <select id="f-brand" name="brand">
+          <option value="">All brands</option>
+          <% brands.forEach(function (b) { %><option <%= opts.brand === b ? 'selected' : '' %>><%= b %></option><% }) %>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-pack">Pack size</label>
+        <select id="f-pack" name="pack">
+          <option value="">Any pack size</option>
+          <% packSizes.forEach(function (s) { %><option <%= opts.pack === s ? 'selected' : '' %>><%= s %></option><% }) %>
+        </select>
+      </div>
+      <fieldset class="field">
+        <legend>Availability</legend>
+        <label class="radio"><input type="radio" name="availability" value="" <%= !opts.availability ? 'checked' : '' %>> Any</label>
+        <label class="radio"><input type="radio" name="availability" value="in" <%= opts.availability === 'in' ? 'checked' : '' %>> In stock</label>
+        <label class="radio"><input type="radio" name="availability" value="out" <%= opts.availability === 'out' ? 'checked' : '' %>> Out of stock</label>
+      </fieldset>
+      <fieldset class="field">
+        <legend>Show only</legend>
+        <% if (!fixed.isNew) { %><label class="check"><input type="checkbox" name="new" value="1" <%= opts.isNew ? 'checked' : '' %>> New products</label><% } %>
+        <label class="check"><input type="checkbox" name="featured" value="1" <%= opts.featured ? 'checked' : '' %>> Featured products</label>
+      </fieldset>
+      <input type="hidden" name="sort" value="<%= result.sort === 'relevance' ? '' : result.sort %>">
+      <div class="filter-actions">
+        <button class="btn btn-primary btn-block" type="submit">Apply filters</button>
+        <a class="btn btn-ghost btn-block" href="<%= path %>">Clear all</a>
+      </div>
+    </form>
+  </aside>
+  <div class="filters-backdrop" data-filters-close hidden></div>
+
+  <section class="listing-main">
+    <div class="listing-toolbar">
+      <button type="button" class="btn btn-outline btn-sm filters-open" data-filters-open><svg class="ic"><use href="#i-filter"/></svg> Filter<% if (activeFilters.length) { %> (<%= activeFilters.length %>)<% } %></button>
+      <p class="result-count"><strong><%= result.total %></strong> product<%= result.total === 1 ? '' : 's' %></p>
+      <form action="<%= path %>" method="get" class="sort-form">
+        <% Object.entries(query).forEach(function ([k, v]) { if (k !== 'sort' && k !== 'page' && v) { %><input type="hidden" name="<%= k %>" value="<%= v %>"><% } }) %>
+        <label class="sr-only" for="sort">Sort by</label>
+        <select id="sort" name="sort" data-autosubmit-select>
+          <option value="relevance" <%= result.sort === 'relevance' ? 'selected' : '' %>>Sort: Recommended</option>
+          <option value="newest" <%= result.sort === 'newest' ? 'selected' : '' %>>Newest first</option>
+          <option value="name" <%= result.sort === 'name' ? 'selected' : '' %>>Name A–Z</option>
+          <option value="brand" <%= result.sort === 'brand' ? 'selected' : '' %>>Brand A–Z</option>
+        </select>
+        <noscript><button class="btn btn-sm btn-outline">Sort</button></noscript>
+      </form>
+    </div>
+    <% if (activeFilters.length || opts.q) { %>
+    <div class="chips">
+      <% if (opts.q) { %><a class="chip" href="<%= without('q') %>">“<%= opts.q %>” <svg class="ic"><use href="#i-close"/></svg></a><% } %>
+      <% activeFilters.forEach(function ([k, label]) { %><a class="chip" href="<%= without(k) %>"><%= label %> <svg class="ic"><use href="#i-close"/></svg></a><% }) %>
+    </div>
+    <% } %>
+
+    <% if (products.length) { %>
+      <div class="product-grid product-grid-listing">
+        <% products.forEach(function (p) { %><%- include('../partials/product-card', { p }) %><% }) %>
+      </div>
+      <%- include('../partials/pagination') %>
+    <% } else { %>
+      <div class="empty">
+        <svg class="ic ic-xl"><use href="#i-search"/></svg>
+        <h2>No products found</h2>
+        <p>Try a different search or clear your filters. Can't find what you need? Tell us and we'll source it.</p>
+        <div class="empty-actions"><a class="btn btn-outline" href="<%= path %>">Clear filters</a><a class="btn btn-accent" href="/contact">Request a product</a></div>
+      </div>
+    <% } %>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

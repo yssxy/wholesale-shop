@@ -1,0 +1,14 @@
+<%- include('../partials/head', { meta: { title: title + ' | WholesaleHub', noindex: true } }) %>
+<%- include('../partials/header') %>
+<div class="container narrow">
+  <div class="empty empty-page">
+    <p class="error-code"><%= status %></p>
+    <h1><%= title %></h1>
+    <p><%= message %></p>
+    <div class="empty-actions">
+      <a class="btn btn-outline" href="/">Home</a>
+      <a class="btn btn-primary" href="/products">Browse products</a>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>

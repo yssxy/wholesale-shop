@@ -1,0 +1,34 @@
+<%
+  const m = meta || {};
+  const pageTitle = m.title || (typeof title !== 'undefined' ? title + ' | WholesaleHub' : 'WholesaleHub | UK Trade Wholesale Catalogue');
+  const pageDesc = m.description || 'WholesaleHub is a UK B2B wholesale catalogue for retailers, newsagents and caterers. Browse trade products and make an offer.';
+  const canonical = siteUrl + path;
+  const ogImage = m.image ? (m.image.startsWith('http') ? m.image : siteUrl + m.image) : siteUrl + '/static/img/og-default.svg';
+%><!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title><%= pageTitle %></title>
+  <meta name="description" content="<%= pageDesc %>">
+  <% if (m.noindex || adminArea) { %><meta name="robots" content="noindex, nofollow"><% } else { %><link rel="canonical" href="<%= canonical %>"><% } %>
+  <meta name="theme-color" content="#131c2b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WholesaleHub">
+  <meta property="og:site_name" content="WholesaleHub">
+  <meta property="og:type" content="<%= m.type === 'product' ? 'product' : 'website' %>">
+  <meta property="og:title" content="<%= pageTitle %>">
+  <meta property="og:description" content="<%= pageDesc %>">
+  <meta property="og:url" content="<%= canonical %>">
+  <meta property="og:image" content="<%= ogImage %>">
+  <meta property="og:locale" content="en_GB">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/img/favicon.svg">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <%- typeof jsonLd !== 'undefined' && jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>` : '' %>
+</head>
+<body class="<%= adminArea ? 'is-admin' : '' %>">
+<%- include('icons') %>
+<a class="skip-link" href="#main">Skip to content</a>

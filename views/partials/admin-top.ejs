@@ -1,0 +1,31 @@
+<%- include('head') %>
+<div class="admin-shell">
+  <header class="admin-topbar">
+    <button class="icon-btn admin-menu-btn" type="button" aria-label="Open admin menu" aria-controls="admin-nav" aria-expanded="false" data-admin-nav-toggle><svg class="ic ic-lg"><use href="#i-menu"/></svg></button>
+    <a class="brand" href="/admin"><%- include('logo') %><span class="admin-tag">Admin</span></a>
+    <div class="admin-topbar-actions">
+      <a class="icon-btn notif-btn" href="/admin/notifications" aria-label="Notifications"><svg class="ic ic-lg"><use href="#i-bell"/></svg><% if (adminUnread) { %><span class="notif-dot"><%= adminUnread > 99 ? '99+' : adminUnread %></span><% } %></a>
+      <a class="btn btn-accent btn-sm hide-xs" href="/admin/products/new"><svg class="ic"><use href="#i-plus"/></svg> Add Product</a>
+    </div>
+  </header>
+  <nav class="admin-nav" id="admin-nav" aria-label="Admin">
+    <% const items = [
+      ['dashboard', '/admin', 'Dashboard', 'i-grid'],
+      ['offers', '/admin/offers', 'Offers', 'i-tag'],
+      ['enquiries', '/admin/enquiries', 'Enquiries', 'i-chat'],
+      ['messages', '/admin/messages', 'Contact Messages', 'i-mail'],
+      ['products', '/admin/products', 'Products', 'i-box'],
+      ['categories', '/admin/categories', 'Categories', 'i-filter'],
+      ['buyers', '/admin/buyers', 'Buyers', 'i-user'],
+      ['notifications', '/admin/notifications', 'Notifications', 'i-bell'],
+    ]; items.forEach(function ([key, href, label, icon]) { %>
+      <a href="<%= href %>" class="<%= section === key ? 'active' : '' %>"><svg class="ic"><use href="#<%= icon %>"/></svg> <%= label %></a>
+    <% }) %>
+    <div class="admin-nav-foot">
+      <a href="/" target="_blank" rel="noopener"><svg class="ic"><use href="#i-home"/></svg> View website</a>
+      <form action="/logout" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit" class="linklike"><svg class="ic"><use href="#i-lock"/></svg> Log out</button></form>
+    </div>
+  </nav>
+  <div class="admin-backdrop" data-admin-nav-close hidden></div>
+  <main id="main" class="admin-main">
+    <%- include('flash') %>

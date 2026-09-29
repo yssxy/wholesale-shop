@@ -1,0 +1,9 @@
+<a class="list-row" href="/account/offers/<%= o.id %>">
+  <span class="list-thumb"><% if (o.product_image) { %><img src="<%= o.product_image %>" alt="" width="56" height="56" loading="lazy"><% } %></span>
+  <span class="list-main">
+    <strong><%= o.product_name %></strong>
+    <span class="muted small"><%= o.reference %> · <%= formatDate(o.created_at) %></span>
+    <span class="small"><%= o.quantity.toLocaleString('en-GB') %> packs @ <%= money(o.offer_price) %><% if (o.counter_price && o.status === 'counter_offer') { %> · <span class="accent">Counter <%= money(o.counter_price) %></span><% } %><% if (o.agreed_price) { %> · <span class="ok">Agreed <%= money(o.agreed_price) %></span><% } %></span>
+  </span>
+  <span class="status status-<%= o.status %>"><%= statusLabel(OFFER_STATUSES, o.status) %></span>
+</a>

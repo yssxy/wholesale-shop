@@ -1,0 +1,31 @@
+<article class="card product-card">
+  <a class="card-media" href="/products/<%= p.slug %>" tabindex="-1" aria-hidden="true">
+    <% if (p.image) { %><img src="<%= p.image %>" alt="" loading="lazy" decoding="async" width="300" height="300"><% } else { %><span class="no-image"><svg class="ic"><use href="#i-box"/></svg></span><% } %>
+    <span class="card-badges">
+      <% if (p.new_product) { %><span class="badge badge-new">New</span><% } %>
+      <% if (p.featured) { %><span class="badge badge-featured">Featured</span><% } %>
+      <% if (p.availability && p.availability.key === 'out') { %><span class="badge badge-out">Out of stock</span><% } %>
+    </span>
+  </a>
+  <% if (isBuyer) { %>
+  <form class="save-form" action="/account/saved/<%= p.id %>" method="post" data-save>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="back" value="<%= path %>">
+    <button type="submit" class="save-btn<%= savedIds.has(p.id) ? ' is-saved' : '' %>" aria-pressed="<%= savedIds.has(p.id) %>" aria-label="Save <%= p.name %>">
+      <svg class="ic ic-off"><use href="#i-heart"/></svg><svg class="ic ic-on"><use href="#i-heart-fill"/></svg>
+    </button>
+  </form>
+  <% } %>
+  <div class="card-body">
+    <p class="card-meta"><span class="card-brand"><%= p.brand %></span><% if (p.category_name) { %><span class="dot">·</span><a href="/category/<%= p.category_slug %>"><%= p.category_name %></a><% } %></p>
+    <h3 class="card-title"><a href="/products/<%= p.slug %>"><%= p.name %></a></h3>
+    <p class="card-pack"><svg class="ic"><use href="#i-box"/></svg> <%= p.pack_size || 'Single unit' %></p>
+    <p class="card-desc"><%= truncate(p.description, 90) %></p>
+    <p class="card-price">
+      <% if (p.wholesale_price) { %><span class="price">Guide <strong><%= money(p.wholesale_price) %></strong></span><% } else if (!user) { %><a class="price-login" href="/login"><svg class="ic"><use href="#i-lock"/></svg> Log in for trade price</a><% } else { %><span class="price muted">Price on request</span><% } %>
+    </p>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-outline btn-sm" href="/products/<%= p.slug %>">View Product</a>
+    <a class="btn btn-accent btn-sm" href="/offer?product=<%= p.slug %>">Make Offer</a>
+  </div>
+</article>

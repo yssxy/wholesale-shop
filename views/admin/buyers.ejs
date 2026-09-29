@@ -1,0 +1,28 @@
+<%- include('../partials/admin-top') %>
+<div class="admin-head"><div><h1>Buyers</h1><p class="muted"><%= buyers.length %> registered trade account<%= buyers.length === 1 ? '' : 's' %></p></div></div>
+<form class="toolbar" method="get" action="/admin/buyers">
+  <input type="search" name="q" value="<%= q %>" placeholder="Search name, business or email" aria-label="Search buyers">
+  <button class="btn btn-primary btn-sm" type="submit">Search</button>
+</form>
+<div class="card table-card">
+  <table class="table table-responsive">
+    <thead><tr><th>Buyer</th><th>Business</th><th>Email</th><th>Phone</th><th>Registered</th><th class="num">Enquiries</th><th class="num">Offers</th><th class="num">Accepted</th><th class="num">Potential value</th></tr></thead>
+    <tbody>
+    <% buyers.forEach(function (b) { %>
+      <tr>
+        <td data-label="Buyer"><a href="/admin/buyers/<%= b.id %>"><strong><%= b.name %></strong></a></td>
+        <td data-label="Business"><%= b.business_name || '—' %><span class="muted small block"><%= b.business_type || '' %></span></td>
+        <td data-label="Email"><a href="mailto:<%= b.email %>"><%= b.email %></a></td>
+        <td data-label="Phone"><% if (b.phone) { %><a href="tel:<%= b.phone.replace(/\s/g, '') %>"><%= b.phone %></a><% } else { %>—<% } %></td>
+        <td data-label="Registered"><%= formatDate(b.created_at) %></td>
+        <td data-label="Enquiries" class="num"><%= b.enquiry_count %></td>
+        <td data-label="Offers" class="num"><%= b.offer_count %></td>
+        <td data-label="Accepted" class="num"><%= b.accepted_count %></td>
+        <td data-label="Potential value" class="num"><strong><%= money(b.potential_value) %></strong></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% if (!buyers.length) { %><div class="empty empty-sm"><p>No buyers found.</p></div><% } %>
+</div>
+<%- include('../partials/admin-bottom') %>

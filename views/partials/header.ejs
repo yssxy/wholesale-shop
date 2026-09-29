@@ -1,0 +1,93 @@
+<div class="topbar">
+  <div class="container topbar-inner">
+    <span class="topbar-item"><svg class="ic"><use href="#i-truck"/></svg> Trade only<span class="hide-sm">&nbsp;wholesale · UK delivery &amp; collection</span></span>
+    <a class="topbar-item" href="tel:<%= site.phoneHref %>"><svg class="ic"><use href="#i-phone"/></svg> <%= site.phone %></a>
+    <a class="topbar-item hide-sm" href="https://wa.me/<%= site.whatsappHref %>" rel="noopener"><svg class="ic"><use href="#i-whatsapp"/></svg> WhatsApp</a>
+  </div>
+</div>
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <button class="icon-btn menu-toggle" type="button" aria-label="Open menu" aria-controls="drawer" aria-expanded="false" data-drawer-open>
+      <svg class="ic ic-lg"><use href="#i-menu"/></svg>
+    </button>
+    <a class="brand" href="/" aria-label="WholesaleHub home"><%- include('logo') %></a>
+
+    <form class="header-search" action="/products" method="get" role="search" data-search>
+      <label class="sr-only" for="hs-q">Search products</label>
+      <input id="hs-q" type="search" name="q" placeholder="Search products, brands or SKU…" value="<%= path === '/products' ? (query.q || '') : '' %>" autocomplete="off" data-search-input>
+      <button type="submit" aria-label="Search"><svg class="ic"><use href="#i-search"/></svg></button>
+      <div class="search-suggest" data-search-results hidden></div>
+    </form>
+
+    <nav class="header-nav" aria-label="Main">
+      <a href="/categories" class="<%= path.startsWith('/categor') ? 'active' : '' %>">Categories</a>
+      <a href="/about" class="<%= path === '/about' ? 'active' : '' %>">About</a>
+      <a href="/contact" class="<%= path === '/contact' ? 'active' : '' %>">Contact</a>
+      <% if (user && user.role === 'buyer') { %>
+        <a href="/account" class="nav-account"><svg class="ic"><use href="#i-user"/></svg> My Account</a>
+      <% } else if (user && user.role === 'admin') { %>
+        <a href="/admin" class="nav-account"><svg class="ic"><use href="#i-grid"/></svg> Admin</a>
+      <% } else { %>
+        <a href="/login" class="nav-account"><svg class="ic"><use href="#i-user"/></svg> Buyer Login</a>
+        <a href="/admin/login" class="nav-admin"><svg class="ic"><use href="#i-lock"/></svg> Admin</a>
+      <% } %>
+      <a href="/offer" class="btn btn-accent btn-sm">Make an Offer</a>
+    </nav>
+
+    <button class="icon-btn search-toggle" type="button" aria-label="Search" data-search-toggle>
+      <svg class="ic ic-lg"><use href="#i-search"/></svg>
+    </button>
+  </div>
+  <nav class="catbar" aria-label="Categories">
+    <div class="container catbar-inner">
+      <% navCategories.forEach(function (c) { %>
+        <a href="/category/<%= c.slug %>" class="<%= path === '/category/' + c.slug ? 'active' : '' %>"><%= c.name %></a>
+      <% }) %>
+    </div>
+  </nav>
+</header>
+
+<div class="drawer-backdrop" data-drawer-close hidden></div>
+<aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true" tabindex="-1">
+  <div class="drawer-head">
+    <a class="brand" href="/"><%- include('logo') %></a>
+    <button class="icon-btn" type="button" aria-label="Close menu" data-drawer-close><svg class="ic ic-lg"><use href="#i-close"/></svg></button>
+  </div>
+  <div class="drawer-body">
+    <a href="/offer" class="btn btn-accent btn-block">Make an Offer</a>
+    <nav class="drawer-links" aria-label="Site">
+      <a href="/"><svg class="ic"><use href="#i-home"/></svg> Home</a>
+      <a href="/products"><svg class="ic"><use href="#i-grid"/></svg> All Products</a>
+      <a href="/new-products"><svg class="ic"><use href="#i-tag"/></svg> New Products</a>
+      <a href="/contact"><svg class="ic"><use href="#i-phone"/></svg> Contact</a>
+      <% if (user && user.role === 'buyer') { %>
+        <a href="/account"><svg class="ic"><use href="#i-user"/></svg> My Account</a>
+        <a href="/account/offers"><svg class="ic"><use href="#i-chat"/></svg> My Offers</a>
+        <a href="/account/saved"><svg class="ic"><use href="#i-heart"/></svg> Saved Products</a>
+      <% } else if (user && user.role === 'admin') { %>
+        <a href="/admin"><svg class="ic"><use href="#i-grid"/></svg> Admin Dashboard</a>
+      <% } else { %>
+        <a href="/login"><svg class="ic"><use href="#i-user"/></svg> Buyer Login</a>
+        <a href="/register"><svg class="ic"><use href="#i-plus"/></svg> Open a Trade Account</a>
+      <% } %>
+    </nav>
+    <p class="drawer-title">Categories</p>
+    <nav class="drawer-cats" aria-label="Categories">
+      <% navCategories.forEach(function (c) { %>
+        <a href="/category/<%= c.slug %>"><span><%= c.name %></span><svg class="ic"><use href="#i-chevron"/></svg></a>
+      <% }) %>
+    </nav>
+    <% if (user) { %>
+      <form action="/logout" method="post" class="drawer-logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-ghost btn-block" type="submit">Log out</button>
+      </form>
+    <% } %>
+    <div class="drawer-contact">
+      <a href="tel:<%= site.phoneHref %>"><svg class="ic"><use href="#i-phone"/></svg> <%= site.phone %></a>
+      <a href="https://wa.me/<%= site.whatsappHref %>" rel="noopener"><svg class="ic"><use href="#i-whatsapp"/></svg> WhatsApp us</a>
+    </div>
+  </div>
+</aside>
+<%- include('flash') %>
+<main id="main">

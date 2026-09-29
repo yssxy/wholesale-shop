@@ -1,0 +1,103 @@
+<%- include('../partials/admin-top') %>
+<% const o = offer; const margin = o.cost_price ? (price) => ((price - o.cost_price) / price * 100) : null; %>
+<div class="admin-head">
+  <div>
+    <a class="back-link" href="/admin/offers"><svg class="ic"><use href="#i-back"/></svg> Offers</a>
+    <h1>Offer <%= o.reference %></h1>
+    <p class="muted">Submitted <%= formatDate(o.created_at, true) %> · updated <%= formatDate(o.updated_at, true) %></p>
+  </div>
+  <span class="status status-<%= o.status %> status-lg"><%= statusLabel(OFFER_STATUSES, o.status) %></span>
+</div>
+
+<div class="offer-admin-grid">
+  <div class="stack">
+    <section class="card">
+      <h2>Offer</h2>
+      <div class="offer-summary">
+        <% if (o.product_image) { %><img src="<%= o.product_image %>" alt="" width="88" height="88"><% } %>
+        <div>
+          <strong><%= o.product_name %></strong>
+          <p class="muted small"><%= o.sku || 'Product deleted' %><%= o.pack_size ? ' · ' + o.pack_size : '' %><% if (o.product_slug) { %> · <a href="/products/<%= o.product_slug %>" target="_blank" rel="noopener">View</a><% } %></p>
+        </div>
+      </div>
+      <dl class="spec-list spec-list-2">
+        <div><dt>Quantity</dt><dd><%= o.quantity.toLocaleString('en-GB') %> packs<% if (o.minimum_order && o.quantity < o.minimum_order) { %> <span class="text-bad">(below MOQ <%= o.minimum_order %>)</span><% } %></dd></div>
+        <div><dt>Offer price</dt><dd><strong><%= money(o.offer_price) %></strong> / pack</dd></div>
+        <div><dt>List (wholesale)</dt><dd><%= money(o.wholesale_price) %></dd></div>
+        <div><dt>Supplier cost <span class="badge badge-internal">Internal</span></dt><dd><%= money(o.cost_price) %></dd></div>
+        <div><dt>Margin at offer</dt><dd><% if (margin) { const m = margin(o.offer_price); %><span class="<%= m < 10 ? 'text-bad' : 'text-ok' %>"><%= m.toFixed(1) %>%</span><% } else { %>—<% } %></dd></div>
+        <div><dt>Stock</dt><dd><%= o.stock_quantity ?? '—' %></dd></div>
+        <% if (o.counter_price) { %><div><dt>Counter-offer</dt><dd class="accent"><%= money(o.counter_price) %></dd></div><% } %>
+        <% if (o.agreed_price) { %><div><dt>Agreed price</dt><dd class="ok"><%= money(o.agreed_price) %></dd></div><% } %>
+        <div><dt>Potential value</dt><dd><strong><%= money(o.quantity * (o.agreed_price || o.counter_price || o.offer_price)) %></strong></dd></div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>Conversation with buyer</h2>
+      <div class="thread">
+        <% if (o.message) { %><div class="msg msg-buyer"><p><%= o.message %></p><span><%= formatDate(o.created_at, true) %> · <%= o.buyer_name %></span></div><% } %>
+        <% messages.forEach(function (m) { %><div class="msg msg-<%= m.sender_role === 'admin' ? 'admin' : 'buyer' %>"><p><%= m.message %></p><span><%= formatDate(m.created_at, true) %> · <%= m.sender_role === 'admin' ? 'WholesaleHub' : o.buyer_name %></span></div><% }) %>
+        <% if (!o.message && !messages.length) { %><p class="muted small">No messages.</p><% } %>
+      </div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <h2>Buyer</h2>
+      <dl class="spec-list">
+        <div><dt>Name</dt><dd><% if (o.buyer_id) { %><a href="/admin/buyers/<%= o.buyer_id %>"><%= o.buyer_name %></a><% } else { %><%= o.buyer_name %> <span class="badge">Guest</span><% } %></dd></div>
+        <div><dt>Business</dt><dd><%= o.business_name || '—' %></dd></div>
+        <div><dt>Email</dt><dd><a href="mailto:<%= o.email %>?subject=<%= encodeURIComponent('Your offer ' + o.reference) %>"><%= o.email %></a></dd></div>
+        <div><dt>Phone</dt><dd><% if (o.phone) { %><a href="tel:<%= o.phone.replace(/\s/g, '') %>"><%= o.phone %></a><% } else { %>—<% } %></dd></div>
+        <div><dt>Prefers</dt><dd><strong><%= statusLabel(CONTACT_METHODS, o.contact_method) %></strong></dd></div>
+      </dl>
+      <div class="quick-contact">
+        <% if (o.phone) { %><a class="btn btn-outline btn-sm" href="tel:<%= o.phone.replace(/\s/g, '') %>"><svg class="ic"><use href="#i-phone"/></svg> Call</a>
+        <a class="btn btn-outline btn-sm" href="https://wa.me/<%= o.phone.replace(/\D/g, '').replace(/^0/, '44') %>" target="_blank" rel="noopener"><svg class="ic"><use href="#i-whatsapp"/></svg> WhatsApp</a><% } %>
+        <a class="btn btn-outline btn-sm" href="mailto:<%= o.email %>"><svg class="ic"><use href="#i-mail"/></svg> Email</a>
+      </div>
+      <% if (history.length) { %>
+        <h3 class="small-heading">Other offers from this buyer</h3>
+        <ul class="mini-list"><% history.forEach(function (h) { %><li><a href="/admin/offers/<%= h.id %>"><%= h.product_name %></a> <span class="muted small"><%= h.quantity %> @ <%= money(h.offer_price) %> · <%= statusLabel(OFFER_STATUSES, h.status) %></span></li><% }) %></ul>
+      <% } %>
+    </section>
+
+    <section class="card">
+      <h2>Respond</h2>
+      <% if (!['accepted', 'rejected', 'completed'].includes(o.status)) { %>
+      <div class="decision-row">
+        <form action="/admin/offers/<%= o.id %>" method="post" data-confirm="Accept this offer at <%= money(o.status === 'counter_offer' && o.counter_price ? o.counter_price : o.offer_price) %>?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="action" value="accept"><button class="btn btn-ok" type="submit"><svg class="ic"><use href="#i-check"/></svg> Accept</button></form>
+        <form action="/admin/offers/<%= o.id %>" method="post" data-confirm="Reject this offer?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="action" value="reject"><button class="btn btn-danger-outline" type="submit">Reject</button></form>
+      </div>
+      <form action="/admin/offers/<%= o.id %>" method="post" class="counter-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="action" value="counter">
+        <label for="counter">Counter-offer price per pack</label>
+        <div class="inline-field">
+          <div class="input-prefix"><span>£</span><input id="counter" name="counter_price" inputmode="decimal" value="<%= o.counter_price || (o.wholesale_price ? o.wholesale_price.toFixed(2) : '') %>" required></div>
+          <button class="btn btn-primary" type="submit">Send counter-offer</button>
+        </div>
+        <label for="counter-msg" class="sr-only">Message</label>
+        <textarea id="counter-msg" name="buyer_message" rows="2" placeholder="Optional note to the buyer"></textarea>
+      </form>
+      <% } else if (o.status === 'accepted') { %>
+        <form action="/admin/offers/<%= o.id %>" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="action" value="complete"><button class="btn btn-ok btn-block" type="submit">Mark deal completed</button></form>
+      <% } %>
+
+      <form action="/admin/offers/<%= o.id %>" method="post" class="status-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="action" value="save">
+        <div class="field"><label for="st">Status</label>
+          <select id="st" name="status"><% OFFER_STATUSES.forEach(function ([k, l]) { %><option value="<%= k %>" <%= o.status === k ? 'selected' : '' %>><%= l %></option><% }) %></select>
+        </div>
+        <div class="field"><label for="bm">Message to buyer <span class="muted small">(visible to buyer)</span></label><textarea id="bm" name="buyer_message" rows="3"></textarea></div>
+        <div class="field"><label for="notes">Internal notes <span class="badge badge-internal">Admin only</span></label><textarea id="notes" name="admin_notes" rows="3"><%= o.admin_notes || '' %></textarea></div>
+        <button class="btn btn-primary btn-block" type="submit">Save changes</button>
+      </form>
+    </section>
+    <form action="/admin/offers/<%= o.id %>/delete" method="post" class="danger-zone" data-confirm="Delete offer <%= o.reference %> permanently?">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>"><div><strong>Delete offer</strong></div><button class="btn btn-danger btn-sm" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+<%- include('../partials/admin-bottom') %>

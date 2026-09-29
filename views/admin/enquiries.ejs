@@ -1,0 +1,22 @@
+<%- include('../partials/admin-top') %>
+<div class="admin-head"><h1>Enquiries</h1></div>
+<div class="chips chips-scroll">
+  <a class="chip <%= !status ? 'chip-active' : '' %>" href="/admin/enquiries">All</a>
+  <% ENQUIRY_STATUSES.forEach(function ([k, l]) { %><a class="chip <%= status === k ? 'chip-active' : '' %>" href="/admin/enquiries?status=<%= k %>"><%= l %> <span class="chip-count"><%= counts[k] || 0 %></span></a><% }) %>
+</div>
+<section class="card">
+  <div class="list">
+  <% enquiries.forEach(function (e) { %>
+    <a class="list-row <%= e.status === 'new' ? 'is-unread' : '' %>" href="/admin/enquiries/<%= e.id %>">
+      <span class="list-main">
+        <strong><%= e.name %><%= e.business_name ? ' · ' + e.business_name : '' %></strong>
+        <span class="muted small"><%= e.reference %> · <%= formatDate(e.created_at, true) %><%= e.product_name ? ' · ' + e.product_name : '' %></span>
+        <span class="small"><%= truncate(e.message, 140) %></span>
+      </span>
+      <span class="status status-enq-<%= e.status %>"><%= statusLabel(ENQUIRY_STATUSES, e.status) %></span>
+    </a>
+  <% }) %>
+  <% if (!enquiries.length) { %><p class="muted">No enquiries.</p><% } %>
+  </div>
+</section>
+<%- include('../partials/admin-bottom') %>

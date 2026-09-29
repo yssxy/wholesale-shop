@@ -1,0 +1,37 @@
+<%- include('../partials/admin-top') %>
+<% const e = enquiry; %>
+<div class="admin-head">
+  <div><a class="back-link" href="/admin/enquiries"><svg class="ic"><use href="#i-back"/></svg> Enquiries</a><h1>Enquiry <%= e.reference %></h1><p class="muted"><%= formatDate(e.created_at, true) %></p></div>
+  <span class="status status-enq-<%= e.status %> status-lg"><%= statusLabel(ENQUIRY_STATUSES, e.status) %></span>
+</div>
+<div class="offer-admin-grid">
+  <div class="stack">
+    <section class="card">
+      <h2>Message</h2>
+      <% if (e.product_name) { %><p class="muted">About <a href="/products/<%= e.product_slug %>" target="_blank" rel="noopener"><%= e.product_name %></a> (<%= e.sku %>)</p><% } %>
+      <div class="thread"><div class="msg msg-buyer"><p><%= e.message %></p><span><%= e.name %></span></div>
+      <% if (e.reply) { %><div class="msg msg-admin"><p><%= e.reply %></p><span>Your reply</span></div><% } %></div>
+    </section>
+  </div>
+  <div class="stack">
+    <section class="card">
+      <h2>Contact</h2>
+      <dl class="spec-list">
+        <div><dt>Name</dt><dd><% if (e.buyer_id) { %><a href="/admin/buyers/<%= e.buyer_id %>"><%= e.name %></a><% } else { %><%= e.name %> <span class="badge">Guest</span><% } %></dd></div>
+        <div><dt>Business</dt><dd><%= e.business_name || '—' %></dd></div>
+        <div><dt>Email</dt><dd><a href="mailto:<%= e.email %>?subject=<%= encodeURIComponent('Re: your enquiry ' + e.reference) %>"><%= e.email %></a></dd></div>
+        <div><dt>Phone</dt><dd><% if (e.phone) { %><a href="tel:<%= e.phone.replace(/\s/g, '') %>"><%= e.phone %></a><% } else { %>—<% } %></dd></div>
+      </dl>
+    </section>
+    <form action="/admin/enquiries/<%= e.id %>" method="post" class="card form-card">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <h2>Reply &amp; status</h2>
+      <div class="field"><label for="reply">Reply <span class="muted small">(shown in buyer's account; emailed if SMTP is set up)</span></label><textarea id="reply" name="reply" rows="4"><%= e.reply || '' %></textarea></div>
+      <div class="field"><label for="st">Status</label><select id="st" name="status"><% ENQUIRY_STATUSES.forEach(function ([k, l]) { %><option value="<%= k %>" <%= e.status === k ? 'selected' : '' %>><%= l %></option><% }) %></select></div>
+      <div class="field"><label for="notes">Internal notes <span class="badge badge-internal">Admin only</span></label><textarea id="notes" name="admin_notes" rows="3"><%= e.admin_notes || '' %></textarea></div>
+      <button class="btn btn-primary btn-block" type="submit">Save</button>
+    </form>
+    <form action="/admin/enquiries/<%= e.id %>/delete" method="post" class="danger-zone" data-confirm="Delete this enquiry?"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><div><strong>Delete enquiry</strong></div><button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
+  </div>
+</div>
+<%- include('../partials/admin-bottom') %>

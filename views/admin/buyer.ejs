@@ -1,0 +1,54 @@
+<%- include('../partials/admin-top') %>
+<% const b = buyer; %>
+<div class="admin-head">
+  <div><a class="back-link" href="/admin/buyers"><svg class="ic"><use href="#i-back"/></svg> Buyers</a><h1><%= b.business_name || b.name %></h1><p class="muted"><%= b.name %> · registered <%= formatDate(b.created_at) %></p></div>
+</div>
+<div class="kpi-grid kpi-grid-4">
+  <div class="kpi"><span class="kpi-label">Offers</span><span class="kpi-value"><%= b.offer_count %></span></div>
+  <div class="kpi"><span class="kpi-label">Accepted</span><span class="kpi-value"><%= b.accepted_count %></span></div>
+  <div class="kpi"><span class="kpi-label">Enquiries</span><span class="kpi-value"><%= b.enquiry_count %></span></div>
+  <div class="kpi"><span class="kpi-label">Potential value</span><span class="kpi-value"><%= money(b.potential_value) %></span></div>
+</div>
+<div class="offer-admin-grid">
+  <div class="stack">
+    <section class="card">
+      <h2>Offers</h2>
+      <div class="list">
+        <% offers.forEach(function (o) { %>
+        <a class="list-row" href="/admin/offers/<%= o.id %>"><span class="list-main"><strong><%= o.product_name %></strong><span class="muted small"><%= o.reference %> · <%= formatDate(o.created_at) %> · <%= o.quantity %> @ <%= money(o.offer_price) %></span></span><span class="status status-<%= o.status %>"><%= statusLabel(OFFER_STATUSES, o.status) %></span></a>
+        <% }) %>
+        <% if (!offers.length) { %><p class="muted">No offers.</p><% } %>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Enquiries</h2>
+      <div class="list">
+        <% enquiries.forEach(function (e) { %>
+        <a class="list-row" href="/admin/enquiries/<%= e.id %>"><span class="list-main"><strong><%= e.product_name || 'General' %></strong><span class="small"><%= truncate(e.message, 100) %></span></span><span class="status status-enq-<%= e.status %>"><%= statusLabel(ENQUIRY_STATUSES, e.status) %></span></a>
+        <% }) %>
+        <% if (!enquiries.length) { %><p class="muted">No enquiries.</p><% } %>
+      </div>
+    </section>
+  </div>
+  <div class="stack">
+    <section class="card">
+      <h2>Details</h2>
+      <dl class="spec-list">
+        <div><dt>Email</dt><dd><a href="mailto:<%= b.email %>"><%= b.email %></a></dd></div>
+        <div><dt>Phone</dt><dd><%= b.phone || '—' %></dd></div>
+        <div><dt>Business type</dt><dd><%= b.business_type || '—' %></dd></div>
+        <div><dt>Address</dt><dd><%= [b.address, b.postcode].filter(Boolean).join(', ') || '—' %></dd></div>
+        <div><dt>VAT number</dt><dd><%= b.vat_number || '—' %></dd></div>
+      </dl>
+    </section>
+    <section class="card">
+      <h2>Saved products</h2>
+      <ul class="mini-list"><% saved.forEach(function (s) { %><li><a href="/admin/products/<%= s.id %>/edit"><%= s.name %></a> <span class="muted small"><%= s.sku %></span></li><% }) %></ul>
+      <% if (!saved.length) { %><p class="muted">None.</p><% } %>
+    </section>
+    <form action="/admin/buyers/<%= b.id %>/delete" method="post" class="danger-zone" data-confirm="Delete the account for <%= b.name %>? Their offers will be kept.">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>"><div><strong>Delete account</strong><p class="muted small">Offers and enquiries are kept.</p></div><button class="btn btn-danger btn-sm" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+<%- include('../partials/admin-bottom') %>

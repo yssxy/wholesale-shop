@@ -1,0 +1,25 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<%- include('../partials/account-nav') %>
+<div class="container account-body">
+  <section class="card">
+    <% if (enquiries.length) { %>
+      <div class="list">
+      <% enquiries.forEach(function (e) { %>
+        <div class="list-row list-row-static">
+          <span class="list-main">
+            <strong><%= e.product_name ? e.product_name : 'General enquiry' %></strong>
+            <span class="muted small"><%= e.reference %> · <%= formatDate(e.created_at) %></span>
+            <span class="small"><%= e.message %></span>
+            <% if (e.reply) { %><span class="reply-bubble"><strong>WholesaleHub:</strong> <%= e.reply %></span><% } %>
+          </span>
+          <span class="status status-enq-<%= e.status %>"><%= statusLabel(ENQUIRY_STATUSES, e.status) %></span>
+        </div>
+      <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty empty-sm"><p>No enquiries yet. Use “Send Enquiry” on any product page.</p><a class="btn btn-outline" href="/products">Browse products</a></div>
+    <% } %>
+  </section>
+</div>
+<%- include('../partials/footer') %>

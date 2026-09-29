@@ -1,0 +1,31 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="container auth-wrap">
+  <form action="/register" method="post" class="card auth-card auth-card-wide" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+    <h1>Open a Trade Account</h1>
+    <p class="muted">Free for UK businesses. See trade prices, save products and track all your offers.</p>
+    <% if (Object.keys(errors).length) { %><div class="form-error-summary" role="alert">Please check the highlighted fields.</div><% } %>
+    <div class="form-grid">
+      <div class="field <%= errors.name ? 'has-error' : '' %>"><label for="r-name">Your name *</label><input id="r-name" name="name" required autocomplete="name" value="<%= form.name || '' %>"><% if (errors.name) { %><p class="field-error"><%= errors.name %></p><% } %></div>
+      <div class="field <%= errors.business_name ? 'has-error' : '' %>"><label for="r-biz">Business name *</label><input id="r-biz" name="business_name" required autocomplete="organization" value="<%= form.business_name || '' %>"><% if (errors.business_name) { %><p class="field-error"><%= errors.business_name %></p><% } %></div>
+      <div class="field"><label for="r-type">Business type</label>
+        <select id="r-type" name="business_type">
+          <% ['', 'Convenience store', 'Newsagent', 'Off-licence', 'Supermarket', 'Butcher', 'Takeaway / Restaurant', 'Catering', 'Market trader', 'Online retailer', 'Other'].forEach(function (t) { %>
+            <option value="<%= t %>" <%= form.business_type === t ? 'selected' : '' %>><%= t || 'Choose…' %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="field"><label for="r-post">Postcode</label><input id="r-post" name="postcode" autocomplete="postal-code" value="<%= form.postcode || '' %>"></div>
+      <div class="field <%= errors.email ? 'has-error' : '' %>"><label for="r-email">Email *</label><input id="r-email" type="email" name="email" required autocomplete="email" inputmode="email" value="<%= form.email || '' %>"><% if (errors.email) { %><p class="field-error"><%= errors.email %></p><% } %></div>
+      <div class="field <%= errors.phone ? 'has-error' : '' %>"><label for="r-phone">Phone *</label><input id="r-phone" type="tel" name="phone" required autocomplete="tel" inputmode="tel" value="<%= form.phone || '' %>"><% if (errors.phone) { %><p class="field-error"><%= errors.phone %></p><% } %></div>
+      <div class="field <%= errors.password ? 'has-error' : '' %>"><label for="r-pw">Password *</label><input id="r-pw" type="password" name="password" required minlength="8" autocomplete="new-password"><% if (errors.password) { %><p class="field-error"><%= errors.password %></p><% } else { %><p class="field-hint">At least 8 characters</p><% } %></div>
+      <div class="field <%= errors.password_confirm ? 'has-error' : '' %>"><label for="r-pw2">Confirm password *</label><input id="r-pw2" type="password" name="password_confirm" required autocomplete="new-password"><% if (errors.password_confirm) { %><p class="field-error"><%= errors.password_confirm %></p><% } %></div>
+      <div class="field field-full <%= errors.terms ? 'has-error' : '' %>"><label class="check"><input type="checkbox" name="terms" value="1"> I confirm I am buying on behalf of a business</label><% if (errors.terms) { %><p class="field-error"><%= errors.terms %></p><% } %></div>
+    </div>
+    <button class="btn btn-accent btn-lg btn-block" type="submit">Create Account</button>
+    <p class="auth-alt">Already have an account? <a href="/login">Log in</a></p>
+  </form>
+</div>
+<%- include('../partials/footer') %>

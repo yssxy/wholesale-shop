@@ -1,0 +1,11 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<%- include('../partials/account-nav') %>
+<div class="container account-body">
+  <% if (products.length) { %>
+    <div class="product-grid"><% products.forEach(function (p) { %><%- include('../partials/product-card', { p }) %><% }) %></div>
+  <% } else { %>
+    <div class="empty"><svg class="ic ic-xl"><use href="#i-heart"/></svg><h2>No saved products</h2><p>Tap the heart on a product to save it for later.</p><a class="btn btn-accent" href="/products">Browse products</a></div>
+  <% } %>
+</div>
+<%- include('../partials/footer') %>

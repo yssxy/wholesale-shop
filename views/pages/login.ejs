@@ -1,0 +1,20 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="container auth-wrap">
+  <form action="<%= admin ? '/admin/login' : '/login' %>" method="post" class="card auth-card">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <% if (admin) { %><span class="auth-icon"><svg class="ic"><use href="#i-lock"/></svg></span><% } %>
+    <h1><%= admin ? 'Admin Login' : 'Buyer Login' %></h1>
+    <p class="muted"><%= admin ? 'Staff access to the WholesaleHub management dashboard.' : 'Log in to see trade prices, save products and track your offers.' %></p>
+    <% if (error) { %><div class="form-error-summary" role="alert"><%= error %></div><% } %>
+    <div class="field"><label for="l-email">Email</label><input id="l-email" type="email" name="email" required autocomplete="username" inputmode="email" value="<%= email %>" autofocus></div>
+    <div class="field"><label for="l-pw">Password</label><input id="l-pw" type="password" name="password" required autocomplete="current-password"></div>
+    <button class="btn <%= admin ? 'btn-primary' : 'btn-accent' %> btn-lg btn-block" type="submit">Log in</button>
+    <% if (!admin) { %>
+      <p class="auth-alt">New to WholesaleHub? <a href="/register">Open a free trade account</a></p>
+    <% } else { %>
+      <p class="auth-alt"><a href="/login">Buyer login</a></p>
+    <% } %>
+  </form>
+</div>
+<%- include('../partials/footer') %>

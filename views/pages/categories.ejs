@@ -1,0 +1,24 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="page-head">
+  <div class="container">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><svg class="ic"><use href="#i-chevron"/></svg><span>Categories</span></nav>
+    <h1>Product Categories</h1>
+    <p class="page-intro">Everything a UK convenience store, newsagent, off-licence or caterer needs — in trade packs.</p>
+  </div>
+</div>
+<section class="section section-tight">
+  <div class="container">
+    <div class="category-grid category-grid-lg">
+      <% navCategories.forEach(function (c) { %>
+      <a class="category-tile" href="/category/<%= c.slug %>">
+        <span class="category-img"><% if (c.image) { %><img src="<%= c.image %>" alt="" loading="lazy" width="120" height="120"><% } %></span>
+        <span class="category-name"><%= c.name %></span>
+        <span class="category-desc"><%= c.description %></span>
+        <span class="category-count"><%= c.product_count %> products</span>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<%- include('../partials/footer') %>

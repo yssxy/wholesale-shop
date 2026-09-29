@@ -1,0 +1,18 @@
+<%- include('../partials/admin-top') %>
+<div class="admin-head">
+  <h1>Notifications</h1>
+  <form action="/admin/notifications/read" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-outline btn-sm" type="submit">Mark all as read</button></form>
+</div>
+<section class="card">
+  <div class="list">
+  <% notifications.forEach(function (n) { %>
+    <a class="list-row <%= n.is_read ? '' : 'is-unread' %>" href="/admin/notifications/<%= n.id %>/go">
+      <span class="notif-type notif-<%= n.type %>"><%= n.type %></span>
+      <span class="list-main"><strong><%= n.title %></strong><span class="muted small"><%= formatDate(n.created_at, true) %></span></span>
+      <svg class="ic"><use href="#i-chevron"/></svg>
+    </a>
+  <% }) %>
+  <% if (!notifications.length) { %><p class="muted">No notifications.</p><% } %>
+  </div>
+</section>
+<%- include('../partials/admin-bottom') %>

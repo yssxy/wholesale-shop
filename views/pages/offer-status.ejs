@@ -1,0 +1,76 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<div class="container narrow">
+  <% if (typeof inAccount !== 'undefined' && inAccount) { %>
+    <a class="back-link" href="/account/offers"><svg class="ic"><use href="#i-back"/></svg> My offers</a>
+  <% } %>
+  <% if (submitted) { %>
+  <div class="success-panel">
+    <span class="success-icon"><svg class="ic"><use href="#i-check"/></svg></span>
+    <h1>Offer submitted</h1>
+    <p>Thanks <%= offer.buyer_name.split(' ')[0] %> — your offer reference is <strong><%= offer.reference %></strong>. Our trade team has been notified and will respond by <%= statusLabel(CONTACT_METHODS, offer.contact_method).toLowerCase() %>.</p>
+    <p class="small muted">Bookmark this page to check the status of your offer at any time<% if (!user) { %>, or <a href="/register">open a trade account</a> to track offers from your dashboard<% } %>.</p>
+  </div>
+  <% } %>
+
+  <div class="card offer-status-card">
+    <div class="offer-status-head">
+      <div>
+        <p class="muted small">Offer <%= offer.reference %> · <%= formatDate(offer.created_at, true) %></p>
+        <h2><%= offer.product_name %></h2>
+      </div>
+      <span class="status status-<%= offer.status %>"><%= statusLabel(OFFER_STATUSES, offer.status) %></span>
+    </div>
+
+    <ol class="status-track" aria-label="Offer progress">
+      <% const flow = ['new', 'reviewing', offer.status === 'rejected' ? 'rejected' : (offer.status === 'counter_offer' ? 'counter_offer' : 'accepted'), 'completed'];
+         const idx = Math.max(flow.indexOf(offer.status), offer.status === 'rejected' ? 2 : 0);
+         flow.forEach(function (s, i) { %>
+        <li class="<%= i < idx ? 'done' : (i === idx ? 'current' : '') %> <%= s === 'rejected' ? 'is-rejected' : '' %>"><span></span><%= statusLabel(OFFER_STATUSES, s) %></li>
+      <% }) %>
+    </ol>
+
+    <dl class="spec-list spec-list-2">
+      <div><dt>Quantity</dt><dd><%= offer.quantity.toLocaleString('en-GB') %> packs</dd></div>
+      <div><dt>Your offer</dt><dd><%= money(offer.offer_price) %> / pack</dd></div>
+      <% if (offer.counter_price) { %><div><dt>Our counter-offer</dt><dd class="accent"><%= money(offer.counter_price) %> / pack</dd></div><% } %>
+      <% if (offer.agreed_price) { %><div><dt>Agreed price</dt><dd class="ok"><%= money(offer.agreed_price) %> / pack</dd></div><% } %>
+      <div><dt>Total (est.)</dt><dd><%= money(offer.quantity * (offer.agreed_price || offer.counter_price || offer.offer_price)) %></dd></div>
+      <div><dt>Contact by</dt><dd><%= statusLabel(CONTACT_METHODS, offer.contact_method) %></dd></div>
+    </dl>
+
+    <% if (offer.status === 'counter_offer' && offer.counter_price) { %>
+    <div class="counter-box">
+      <p><strong>We've sent you a counter-offer of <%= money(offer.counter_price) %> per pack</strong> (<%= money(offer.counter_price * offer.quantity) %> total).</p>
+      <div class="counter-actions">
+        <form action="<%= actionBase %>/respond" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="action" value="accept_counter"><button class="btn btn-accent" type="submit">Accept counter-offer</button></form>
+        <form action="<%= actionBase %>/respond" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="action" value="decline_counter"><button class="btn btn-outline" type="submit">Decline</button></form>
+      </div>
+    </div>
+    <% } %>
+
+    <h3 class="thread-title">Messages</h3>
+    <div class="thread">
+      <% if (offer.message) { %><div class="msg msg-buyer"><p><%= offer.message %></p><span><%= formatDate(offer.created_at, true) %> · You</span></div><% } %>
+      <% messages.forEach(function (m) { %>
+        <div class="msg msg-<%= m.sender_role %>"><p><%= m.message %></p><span><%= formatDate(m.created_at, true) %> · <%= m.sender_role === 'admin' ? 'WholesaleHub' : 'You' %></span></div>
+      <% }) %>
+      <% if (!offer.message && !messages.length) { %><p class="muted small">No messages yet. We'll post updates here.</p><% } %>
+    </div>
+    <% if (!['rejected', 'completed'].includes(offer.status)) { %>
+    <form action="<%= actionBase %>/respond" method="post" class="reply-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="action" value="message">
+      <label class="sr-only" for="reply">Message</label>
+      <textarea id="reply" name="message" rows="2" placeholder="Send a message about this offer…" required></textarea>
+      <button class="btn btn-primary" type="submit">Send</button>
+    </form>
+    <% } %>
+  </div>
+
+  <div class="after-actions">
+    <% if (product) { %><a class="btn btn-outline" href="/products/<%= product.slug %>">View product</a><% } %>
+    <a class="btn btn-outline" href="/products">Continue browsing</a>
+    <a class="btn btn-accent" href="/offer">Make another offer</a>
+  </div>
+</div>
+<%- include('../partials/footer') %>

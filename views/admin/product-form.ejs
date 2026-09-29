@@ -1,0 +1,83 @@
+<%- include('../partials/admin-top') %>
+<% const p = product; const isEdit = !!p.id; %>
+<div class="admin-head">
+  <div>
+    <a class="back-link" href="/admin/products"><svg class="ic"><use href="#i-back"/></svg> Products</a>
+    <h1><%= isEdit ? 'Edit product' : 'Add Product' %></h1>
+  </div>
+  <% if (isEdit && p.active) { %><a class="btn btn-outline btn-sm" href="/products/<%= p.slug %>" target="_blank" rel="noopener">View on site</a><% } %>
+</div>
+<form action="<%= isEdit ? '/admin/products/' + p.id : '/admin/products' %>?_csrf=<%= encodeURIComponent(csrfToken) %>" method="post" enctype="multipart/form-data" class="product-form" novalidate>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <% if (Object.keys(errors).length) { %><div class="form-error-summary" role="alert">Please fix the highlighted fields.</div><% } %>
+  <div class="product-form-grid">
+    <section class="card form-card">
+      <h2>Product details</h2>
+      <div class="form-grid">
+        <div class="field field-full <%= errors.name ? 'has-error' : '' %>"><label for="pf-name">Product Name *</label><input id="pf-name" name="name" required value="<%= p.name %>"><% if (errors.name) { %><p class="field-error"><%= errors.name %></p><% } %></div>
+        <div class="field"><label for="pf-brand">Brand</label><input id="pf-brand" name="brand" value="<%= p.brand || '' %>"></div>
+        <div class="field <%= errors.sku ? 'has-error' : '' %>"><label for="pf-sku">SKU *</label><input id="pf-sku" name="sku" required value="<%= p.sku %>"><% if (errors.sku) { %><p class="field-error"><%= errors.sku %></p><% } %></div>
+        <div class="field <%= errors.category_id ? 'has-error' : '' %>"><label for="pf-cat">Category *</label>
+          <select id="pf-cat" name="category_id" required>
+            <option value="">Choose…</option>
+            <% categories.forEach(function (c) { %><option value="<%= c.id %>" <%= String(p.category_id) === String(c.id) ? 'selected' : '' %>><%= c.name %></option><% }) %>
+          </select>
+          <% if (errors.category_id) { %><p class="field-error"><%= errors.category_id %></p><% } %>
+        </div>
+        <div class="field"><label for="pf-pack">Pack Size</label><input id="pf-pack" name="pack_size" value="<%= p.pack_size || '' %>" placeholder="e.g. 24 x 330ml"></div>
+        <div class="field field-full"><label for="pf-desc">Description</label><textarea id="pf-desc" name="description" rows="5"><%= p.description || '' %></textarea></div>
+        <div class="field field-full"><label for="pf-slug">URL slug</label><div class="input-prefix"><span>/products/</span><input id="pf-slug" name="slug" value="<%= p.slug || '' %>" placeholder="auto-generated from brand + name"></div></div>
+      </div>
+    </section>
+
+    <div class="form-side">
+      <section class="card form-card">
+        <h2>Product Image</h2>
+        <div class="image-drop" data-image-drop>
+          <img src="<%= p.image || '' %>" alt="" data-image-preview <%= p.image ? '' : 'hidden' %>>
+          <span class="image-drop-empty" <%= p.image ? 'hidden' : '' %>><svg class="ic ic-xl"><use href="#i-box"/></svg> Tap to upload a photo</span>
+          <input type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif" data-image-input aria-label="Product image">
+        </div>
+        <p class="field-hint">JPG, PNG, WebP or GIF, max 5MB. Square images look best.</p>
+        <% if (p.image) { %><label class="check"><input type="checkbox" name="remove_image" value="1"> Remove current image</label><% } %>
+      </section>
+      <section class="card form-card">
+        <h2>Visibility</h2>
+        <label class="switch"><input type="checkbox" name="active" value="1" <%= p.active ? 'checked' : '' %>><span></span> Active <small>Visible in catalogue</small></label>
+        <label class="switch"><input type="checkbox" name="featured" value="1" <%= p.featured ? 'checked' : '' %>><span></span> Featured <small>Shown on homepage</small></label>
+        <label class="switch"><input type="checkbox" name="new_product" value="1" <%= p.new_product ? 'checked' : '' %>><span></span> New Product <small>“New” badge &amp; New Products page</small></label>
+        <label class="switch"><input type="checkbox" name="age_restricted" value="1" <%= p.age_restricted ? 'checked' : '' %>><span></span> Age-restricted <small>Shows Challenge 25 notice</small></label>
+      </section>
+    </div>
+
+    <section class="card form-card">
+      <h2>Stock &amp; ordering</h2>
+      <div class="form-grid">
+        <div class="field"><label for="pf-moq">MOQ (minimum order, packs)</label><input id="pf-moq" type="number" min="1" name="minimum_order" inputmode="numeric" value="<%= p.minimum_order %>"></div>
+        <div class="field"><label for="pf-stock">Stock (packs)</label><input id="pf-stock" type="number" min="0" name="stock_quantity" inputmode="numeric" value="<%= p.stock_quantity %>"></div>
+      </div>
+    </section>
+    <section class="card form-card">
+      <h2>Pricing <span class="muted small">(per pack, ex VAT)</span></h2>
+      <div class="form-grid">
+        <div class="field"><label for="pf-ws">Wholesale Price</label><div class="input-prefix"><span>£</span><input id="pf-ws" name="wholesale_price" inputmode="decimal" value="<%= p.wholesale_price ?? '' %>" data-margin-sell></div><p class="field-hint">Guide trade price shown to logged-in buyers</p></div>
+        <div class="field"><label for="pf-rrp">Suggested Selling Price (RRP)</label><div class="input-prefix"><span>£</span><input id="pf-rrp" name="suggested_price" inputmode="decimal" value="<%= p.suggested_price ?? '' %>"></div><p class="field-hint">Per unit, shown publicly</p></div>
+        <div class="field"><label for="pf-cost">Supplier cost <span class="badge badge-internal">Internal</span></label><div class="input-prefix"><span>£</span><input id="pf-cost" name="cost_price" inputmode="decimal" value="<%= p.cost_price ?? '' %>" data-margin-cost></div><p class="field-hint" data-margin-out>Never shown to buyers</p></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="form-actions sticky-actions">
+    <button class="btn btn-accent btn-lg" type="submit">SAVE PRODUCT</button>
+    <button class="btn btn-outline btn-lg" type="submit" name="save_and_new" value="1">Save &amp; add another</button>
+    <a class="btn btn-ghost" href="/admin/products">Cancel</a>
+  </div>
+</form>
+<% if (isEdit) { %>
+<form action="/admin/products/<%= p.id %>/delete" method="post" class="danger-zone" data-confirm="Delete “<%= p.name %>”? This cannot be undone.">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div><strong>Delete product</strong><p class="muted small">Removes it from the catalogue and buyers' saved lists. Offer history is kept.</p></div>
+  <button class="btn btn-danger" type="submit">Delete product</button>
+</form>
+<% } %>
+<%- include('../partials/admin-bottom') %>

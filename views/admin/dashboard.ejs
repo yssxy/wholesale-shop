@@ -1,0 +1,75 @@
+<%- include('../partials/admin-top') %>
+<div class="admin-head">
+  <div><h1>Dashboard</h1><p class="muted">Welcome back, <%= user.name.split(' ')[0] %>. Here's how the catalogue is performing.</p></div>
+  <a class="btn btn-accent" href="/admin/products/new"><svg class="ic"><use href="#i-plus"/></svg> Add Product</a>
+</div>
+
+<% if (s.new_offers || s.new_enquiries || s.unread_messages) { %>
+<div class="attention">
+  <% if (s.new_offers) { %><a href="/admin/offers?status=new" class="attention-item"><strong><%= s.new_offers %></strong> new offer<%= s.new_offers === 1 ? '' : 's' %> to review</a><% } %>
+  <% if (s.new_enquiries) { %><a href="/admin/enquiries?status=new" class="attention-item"><strong><%= s.new_enquiries %></strong> new enquir<%= s.new_enquiries === 1 ? 'y' : 'ies' %></a><% } %>
+  <% if (s.unread_messages) { %><a href="/admin/messages" class="attention-item"><strong><%= s.unread_messages %></strong> unread message<%= s.unread_messages === 1 ? '' : 's' %></a><% } %>
+</div>
+<% } %>
+
+<div class="kpi-grid">
+  <div class="kpi kpi-hero"><span class="kpi-label">Total potential sales value</span><span class="kpi-value"><%= money(s.potential_value) %></span><span class="kpi-sub"><%= money(s.won_value) %> accepted / completed</span></div>
+  <a class="kpi" href="/admin/offers"><span class="kpi-label">Total offers</span><span class="kpi-value"><%= s.offers %></span><span class="kpi-sub"><%= s.new_offers %> awaiting review</span></a>
+  <div class="kpi"><span class="kpi-label">Offers this week</span><span class="kpi-value"><%= s.offers_week %></span><span class="kpi-sub">Last 7 days</span></div>
+  <div class="kpi"><span class="kpi-label">Offers this month</span><span class="kpi-value"><%= s.offers_month %></span><span class="kpi-sub">Since the 1st</span></div>
+  <a class="kpi" href="/admin/offers?status=accepted"><span class="kpi-label">Accepted offers</span><span class="kpi-value"><%= s.accepted %></span><span class="kpi-sub">Incl. completed</span></a>
+  <a class="kpi" href="/admin/products"><span class="kpi-label">Total products</span><span class="kpi-value"><%= s.products %></span><span class="kpi-sub"><%= s.active_products %> active · <%= s.out_of_stock %> out of stock</span></a>
+  <a class="kpi" href="/admin/buyers"><span class="kpi-label">Total buyers</span><span class="kpi-value"><%= s.buyers %></span><span class="kpi-sub"><%= s.new_buyers %> new in 30 days</span></a>
+  <a class="kpi" href="/admin/enquiries"><span class="kpi-label">Total enquiries</span><span class="kpi-value"><%= s.enquiries %></span><span class="kpi-sub"><%= s.new_enquiries %> new</span></a>
+</div>
+
+<div class="chart-grid">
+  <section class="card chart-card chart-wide">
+    <h2>Offers per week</h2><p class="muted small">Last 12 weeks · current week highlighted</p>
+    <%- charts.weeks %>
+    <details class="table-view"><summary>View as table</summary><table class="table table-compact"><thead><tr><th>Week starting</th><th class="num">Offers</th></tr></thead><tbody><% weeks.forEach(function (w) { %><tr><td><%= w.label %></td><td class="num"><%= w.value %></td></tr><% }) %></tbody></table></details>
+  </section>
+  <section class="card chart-card">
+    <h2>Offers by status</h2>
+    <%- charts.status %>
+  </section>
+  <section class="card chart-card">
+    <h2>Most popular categories</h2><p class="muted small">By number of offers</p>
+    <%- charts.cats %>
+  </section>
+  <section class="card chart-card">
+    <h2>Most viewed products</h2><p class="muted small">Product page views</p>
+    <%- charts.viewed %>
+  </section>
+  <section class="card chart-card">
+    <h2>Most offered products</h2><p class="muted small">Number of offers received</p>
+    <%- charts.offered %>
+  </section>
+</div>
+
+<div class="two-col">
+  <section class="card">
+    <div class="card-head"><h2>Latest offers</h2><a class="link-more" href="/admin/offers">All offers <svg class="ic"><use href="#i-chevron"/></svg></a></div>
+    <div class="list">
+      <% recentOffers.forEach(function (o) { %>
+      <a class="list-row" href="/admin/offers/<%= o.id %>">
+        <span class="list-main"><strong><%= o.product_name %></strong><span class="muted small"><%= o.business_name || o.buyer_name %> · <%= formatDate(o.created_at) %></span><span class="small"><%= o.quantity %> @ <%= money(o.offer_price) %></span></span>
+        <span class="status status-<%= o.status %>"><%= statusLabel(OFFER_STATUSES, o.status) %></span>
+      </a>
+      <% }) %>
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>Low stock</h2><a class="link-more" href="/admin/products?status=out">Out of stock <svg class="ic"><use href="#i-chevron"/></svg></a></div>
+    <div class="list">
+      <% lowStock.forEach(function (p) { %>
+      <a class="list-row" href="/admin/products/<%= p.id %>/edit">
+        <span class="list-main"><strong><%= p.name %></strong><span class="muted small"><%= p.sku %></span></span>
+        <span class="stock <%= p.stock_quantity <= 0 ? 'stock-out' : 'stock-low' %>"><%= p.stock_quantity %> left</span>
+      </a>
+      <% }) %>
+      <% if (!lowStock.length) { %><p class="muted">All active products are well stocked.</p><% } %>
+    </div>
+  </section>
+</div>
+<%- include('../partials/admin-bottom') %>

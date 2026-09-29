@@ -1,0 +1,46 @@
+<%- include('../partials/admin-top') %>
+<div class="admin-head"><div><h1>Categories</h1><p class="muted">Drag or use the arrows to reorder. Order is reflected in site menus.</p></div></div>
+<div class="two-col two-col-wide">
+  <section class="card">
+    <ol class="cat-list" data-reorder="/admin/categories/reorder">
+      <% categories.forEach(function (c, i) { %>
+      <li class="cat-item <%= c.active ? '' : 'is-inactive' %>" id="c<%= c.id %>" data-id="<%= c.id %>" draggable="true">
+        <span class="drag-handle" aria-hidden="true">⋮⋮</span>
+        <% if (c.image) { %><img src="<%= c.image %>" alt="" width="40" height="40" loading="lazy"><% } %>
+        <span class="cat-main"><strong><%= c.name %></strong><span class="muted small">/category/<%= c.slug %> · <%= c.product_count %> products<%= c.active ? '' : ' · hidden' %></span></span>
+        <span class="cat-actions">
+          <form action="/admin/categories/<%= c.id %>/move" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="dir" value="up"><button class="icon-btn icon-btn-sm" type="submit" aria-label="Move up" <%= i === 0 ? 'disabled' : '' %>>↑</button></form>
+          <form action="/admin/categories/<%= c.id %>/move" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="dir" value="down"><button class="icon-btn icon-btn-sm" type="submit" aria-label="Move down" <%= i === categories.length - 1 ? 'disabled' : '' %>>↓</button></form>
+          <a class="btn btn-outline btn-xs" href="/admin/categories?edit=<%= c.id %>#edit">Edit</a>
+        </span>
+      </li>
+      <% }) %>
+    </ol>
+  </section>
+
+  <% const editing = categories.find(c => c.id === edit); %>
+  <div>
+    <form action="<%= editing ? '/admin/categories/' + editing.id : '/admin/categories' %>?_csrf=<%= encodeURIComponent(csrfToken) %>" method="post" enctype="multipart/form-data" class="card form-card" id="edit">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <h2><%= editing ? 'Edit “' + editing.name + '”' : 'Add category' %></h2>
+      <div class="field"><label for="cf-name">Name *</label><input id="cf-name" name="name" required value="<%= editing ? editing.name : '' %>"></div>
+      <div class="field"><label for="cf-slug">URL slug</label><div class="input-prefix"><span>/category/</span><input id="cf-slug" name="slug" value="<%= editing ? editing.slug : '' %>" placeholder="auto"></div></div>
+      <div class="field"><label for="cf-desc">Description</label><textarea id="cf-desc" name="description" rows="3"><%= editing ? editing.description : '' %></textarea></div>
+      <div class="field"><label for="cf-img">Image</label><input id="cf-img" type="file" name="image" accept="image/jpeg,image/png,image/webp,image/gif"></div>
+      <label class="switch"><input type="checkbox" name="active" value="1" <%= !editing || editing.active ? 'checked' : '' %>><span></span> Active</label>
+      <div class="form-actions">
+        <button class="btn btn-accent" type="submit"><%= editing ? 'Save category' : 'Add category' %></button>
+        <% if (editing) { %><a class="btn btn-ghost" href="/admin/categories">Cancel</a><% } %>
+      </div>
+    </form>
+    <% if (editing) { %>
+    <form action="/admin/categories/<%= editing.id %>/delete" method="post" class="danger-zone" data-confirm="Delete category “<%= editing.name %>”?<%= editing.product_count ? ' Its ' + editing.product_count + ' products will become uncategorised.' : '' %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <% if (editing.product_count) { %><input type="hidden" name="force" value="1"><% } %>
+      <div><strong>Delete category</strong><p class="muted small"><%= editing.product_count ? editing.product_count + ' products will be left without a category.' : 'This category has no products.' %></p></div>
+      <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/admin-bottom') %>

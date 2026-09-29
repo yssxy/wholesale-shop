@@ -1,0 +1,17 @@
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
+<%- include('../partials/account-nav') %>
+<div class="container account-body">
+  <div class="chips chips-scroll">
+    <a class="chip <%= !status ? 'chip-active' : '' %>" href="/account/offers">All</a>
+    <% OFFER_STATUSES.forEach(function ([k, label]) { %><a class="chip <%= status === k ? 'chip-active' : '' %>" href="/account/offers?status=<%= k %>"><%= label %></a><% }) %>
+  </div>
+  <section class="card">
+    <% if (offers.length) { %>
+      <div class="list"><% offers.forEach(function (o) { %><%- include('../partials/offer-row', { o }) %><% }) %></div>
+    <% } else { %>
+      <div class="empty empty-sm"><p>No offers<%= status ? ' with this status' : ' yet' %>.</p><a class="btn btn-accent" href="/offer">Make an Offer</a></div>
+    <% } %>
+  </section>
+</div>
+<%- include('../partials/footer') %>

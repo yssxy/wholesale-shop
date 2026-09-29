@@ -1,0 +1,13 @@
+<div class="page-head page-head-compact account-head">
+  <div class="container">
+    <p class="muted small">Trade account</p>
+    <h1><%= user.business_name || user.name %></h1>
+  </div>
+  <nav class="container tabs" aria-label="Account">
+    <a href="/account" class="<%= tab === 'overview' ? 'active' : '' %>">Overview</a>
+    <a href="/account/offers" class="<%= tab === 'offers' ? 'active' : '' %>">My Offers</a>
+    <a href="/account/enquiries" class="<%= tab === 'enquiries' ? 'active' : '' %>">Enquiries</a>
+    <a href="/account/saved" class="<%= tab === 'saved' ? 'active' : '' %>">Saved</a>
+    <a href="/account/profile" class="<%= tab === 'profile' ? 'active' : '' %>">Profile</a>
+  </nav>
+</div>
